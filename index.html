@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <link rel="icon" href="https://trikoalerts.github.io/favicon.ico" sizes="any" />
+  <link rel="apple-touch-icon" sizes="180x180" href="https://trikoalerts.github.io/apple-touch-icon.png" />
+  <meta name="theme-color" content="#0b1220" />
+  <title>Interest Rate Probability | Central Bank Hike, Hold &amp; Cut Odds</title>
+  <meta name="description" content="Market-implied hike, hold and cut probabilities for 8 major central banks, derived from OIS rates." />
+  <meta name="robots" content="index, follow" />
+  <meta name="author" content="Triko Alerts" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Interest Rate Probability | Central Bank Hike, Hold &amp; Cut Odds" />
+  <meta property="og:description" content="Market-implied hike, hold and cut probabilities for 8 major central banks, derived from OIS rates." />
+  <meta property="og:url" content="https://trikoalerts.github.io/" />
+  <style>
+    :root {
+      --bg: #0b1220; --card: #121a2b; --border: #1e2a42;
+      --text: #e8eef9; --muted: #8b9bb8; --accent: #93c5fd; --radius: 16px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg); color: var(--text); line-height: 1.5; min-height: 100vh;
+    }
+    .container { max-width: 860px; margin: 0 auto; padding: 56px 16px 48px; text-align: center; }
+    h1 { font-size: clamp(1.7rem, 5vw, 2.5rem); font-weight: 700; letter-spacing: -0.02em; margin-bottom: 14px; }
+    .lead { color: var(--muted); font-size: 1rem; max-width: 640px; margin: 0 auto 28px; }
+    .btn {
+      display: inline-block; background: #1d4ed8; color: #fff; text-decoration: none;
+      font-weight: 600; font-size: 1rem; padding: 12px 28px; border-radius: 999px;
+      transition: background .15s, transform .15s;
+    }
+    .btn:hover { background: #2563eb; transform: translateY(-1px); }
+    .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+    h2 { font-size: 1.1rem; font-weight: 650; margin: 48px 0 16px; }
+    .banks { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; text-align: left; }
+    .bank { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; }
+    .flag { display: block; width: 40px; height: 30px; flex-shrink: 0; border-radius: 4px; box-shadow: 0 0 0 1px #2a3a5a; object-fit: cover; }
+    .bank strong { display: block; font-size: 0.95rem; font-weight: 600; }
+    .bank span { color: var(--muted); font-size: 0.8rem; }
+    .bank .code { color: var(--accent); font-weight: 600; }
+
+    .site-footer { margin-top: 36px; padding-top: 18px; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.78rem; text-align: center; }
+    .site-footer a { color: var(--muted); text-decoration: none; margin: 0 6px; }
+    .site-footer a:hover { color: var(--accent); text-decoration: underline; }
+
+    html { -webkit-text-size-adjust: 100%; }
+    body { padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); overflow-x: hidden; }
+    .bank > div { min-width: 0; }
+    .btn { -webkit-tap-highlight-color: transparent; }
+
+    /* Tablet */
+    @media (max-width: 1024px) {
+      .container { padding: 44px 20px 40px; }
+      .banks { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    /* Telefon */
+    @media (max-width: 640px) {
+      .container { padding: 28px 14px 32px; }
+      h1 { margin-bottom: 10px; }
+      .lead { font-size: 0.92rem; margin-bottom: 22px; }
+      .btn { display: block; width: 100%; max-width: 360px; margin: 0 auto; padding: 14px 20px; }
+      h2 { margin: 34px 0 12px; font-size: 1rem; }
+      .banks { grid-template-columns: 1fr; gap: 10px; }
+      .bank { padding: 12px 14px; }
+      .flag { width: 34px; height: 25px; }
+      .site-footer { margin-top: 28px; padding-bottom: env(safe-area-inset-bottom); }
+    }
+
+    /* Cookie consent – wyśrodkowany na ekranie (telefony i tablety) */
+    .cookie-overlay {
+      position: fixed;
+      top: 0; right: 0; bottom: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      height: 100vh;
+      height: 100dvh;
+      background: rgba(0, 0, 0, 0.6);
+      display: grid;
+      place-items: center;
+      padding: 16px;
+      z-index: 2147483000;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      -webkit-transform: translateZ(0);
+      transform: translateZ(0);
+    }
+    .cookie-overlay[hidden] { display: none; }
+    html.cookie-open, body.cookie-open { overflow: hidden; }
+    .cookie-box {
+      position: relative;
+      margin: auto;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      max-width: 460px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      text-align: center;
+    }
+    .cookie-box h2 { font-size: 1.1rem; margin-bottom: 10px; }
+    .cookie-box p { color: var(--muted); font-size: 0.88rem; margin-bottom: 18px; }
+    .cookie-box a { color: var(--accent); }
+    .cookie-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+    .cookie-actions button {
+      font: inherit; font-size: 0.9rem; font-weight: 600; cursor: pointer;
+      padding: 10px 18px; border-radius: 999px; border: 1px solid var(--border);
+      background: transparent; color: var(--text); min-width: 120px;
+    }
+    .cookie-actions button.accept { background: #1e3a5f; border-color: #1e3a5f; color: var(--accent); }
+    .cookie-actions button:hover { opacity: 0.85; }
+
+    @media (max-width: 640px) {
+      .cookie-box { padding: 20px 18px; }
+      .cookie-actions button { flex: 1 1 0; min-width: 0; }
+    }
+  </style>
+  <link rel="canonical" href="https://trikoalerts.github.io/" />
+  <!-- Google Analytics (Consent Mode v2) -->
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    gtag('consent', 'default', {
+      analytics_storage: 'denied',
+      ad_storage: 'denied',
+      ad_user_data: 'denied',
+      ad_personalization: 'denied'
+    });
+    try {
+      if (localStorage.getItem('cookie_consent') === 'accepted') {
+        gtag('consent', 'update', { analytics_storage: 'granted' });
+      }
+    } catch (e) {}
+  </script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-CV4V4Q5GC5"></script>
+  <script>
+    gtag('js', new Date());
+    gtag('config', 'G-CV4V4Q5GC5');
+  </script>
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://trikoalerts.github.io/#website",
+      "url": "https://trikoalerts.github.io/",
+      "name": "Interest Rate Probability",
+      "description": "Market-implied hike, hold and cut probabilities for 8 major central banks, derived from OIS rates.",
+      "inLanguage": "en",
+      "publisher": { "@type": "Organization", "name": "Triko Alerts" }
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://trikoalerts.github.io/#webpage",
+      "url": "https://trikoalerts.github.io/",
+      "name": "Interest Rate Probability | Central Bank Hike, Hold & Cut Odds",
+      "description": "Market-implied hike, hold and cut probabilities for 8 major central banks, derived from OIS rates and updated every 30 seconds.",
+      "inLanguage": "en"
+    },
+    {
+      "@type": "ItemList",
+      "@id": "https://trikoalerts.github.io/#banks",
+      "name": "Central banks covered",
+      "numberOfItems": 8,
+      "itemListElement": [
+    { "@type": "ListItem", "position": 1, "item": { "@type": "Organization", "name": "Federal Reserve", "sameAs": "https://en.wikipedia.org/wiki/Federal_Reserve" } },
+    { "@type": "ListItem", "position": 2, "item": { "@type": "Organization", "name": "European Central Bank", "sameAs": "https://en.wikipedia.org/wiki/European_Central_Bank" } },
+    { "@type": "ListItem", "position": 3, "item": { "@type": "Organization", "name": "Bank of England", "sameAs": "https://en.wikipedia.org/wiki/Bank_of_England" } },
+    { "@type": "ListItem", "position": 4, "item": { "@type": "Organization", "name": "Bank of Japan", "sameAs": "https://en.wikipedia.org/wiki/Bank_of_Japan" } },
+    { "@type": "ListItem", "position": 5, "item": { "@type": "Organization", "name": "Bank of Canada", "sameAs": "https://en.wikipedia.org/wiki/Bank_of_Canada" } },
+    { "@type": "ListItem", "position": 6, "item": { "@type": "Organization", "name": "Reserve Bank of Australia", "sameAs": "https://en.wikipedia.org/wiki/Reserve_Bank_of_Australia" } },
+    { "@type": "ListItem", "position": 7, "item": { "@type": "Organization", "name": "Swiss National Bank", "sameAs": "https://en.wikipedia.org/wiki/Swiss_National_Bank" } },
+    { "@type": "ListItem", "position": 8, "item": { "@type": "Organization", "name": "Reserve Bank of New Zealand", "sameAs": "https://en.wikipedia.org/wiki/Reserve_Bank_of_New_Zealand" } }
+      ]
+    }
+  ]
+}
+  </script>
+</head>
+<body>
+  <div id="cookieBanner" class="cookie-overlay" role="dialog" aria-modal="true" aria-labelledby="cookieTitle" hidden>
+    <div class="cookie-box">
+      <h2 id="cookieTitle">Cookies</h2>
+      <p>We use cookies to measure traffic and improve this site. You can accept or decline analytics cookies. More information is available in our <a href="privacy.html">privacy policy</a>.</p>
+      <div class="cookie-actions">
+        <button type="button" id="cookieDecline">Decline</button>
+        <button type="button" id="cookieAccept" class="accept">Accept</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <header>
+      <h1>Interest Rate Probability</h1>
+      <p class="lead">A live tracker of market-implied probabilities of a rate cut, hold or hike at the upcoming meetings of eight major central banks. Probabilities are calculated from the OIS (Overnight Index Swap) market and updated every 30 seconds.</p>
+      <a class="btn" href="interest-rate-probability.html">View probabilities →</a>
+    </header>
+
+    <main>
+      <h2>Central banks covered</h2>
+      <div class="banks">
+        <div class="bank"><img class="flag" src="https://flagcdn.com/w80/us.png" srcset="https://flagcdn.com/w160/us.png 2x" width="40" height="30" alt="Flag of Federal Reserve" loading="lazy" /><div><strong>Federal Reserve</strong><span><span class="code">USD</span> · Fed Funds</span></div></div>
+        <div class="bank"><img class="flag" src="https://flagcdn.com/w80/eu.png" srcset="https://flagcdn.com/w160/eu.png 2x" width="40" height="30" alt="Flag of European Central Bank" loading="lazy" /><div><strong>European Central Bank</strong><span><span class="code">EUR</span> · Deposit Facility</span></div></div>
+        <div class="bank"><img class="flag" src="https://flagcdn.com/w80/gb.png" srcset="https://flagcdn.com/w160/gb.png 2x" width="40" height="30" alt="Flag of Bank of England" loading="lazy" /><div><strong>Bank of England</strong><span><span class="code">GBP</span> · Bank Rate</span></div></div>
+        <div class="bank"><img class="flag" src="https://flagcdn.com/w80/jp.png" srcset="https://flagcdn.com/w160/jp.png 2x" width="40" height="30" alt="Flag of Bank of Japan" loading="lazy" /><div><strong>Bank of Japan</strong><span><span class="code">JPY</span> · Policy Rate</span></div></div>
+        <div class="bank"><img class="flag" src="https://flagcdn.com/w80/ca.png" srcset="https://flagcdn.com/w160/ca.png 2x" width="40" height="30" alt="Flag of Bank of Canada" loading="lazy" /><div><strong>Bank of Canada</strong><span><span class="code">CAD</span> · Overnight Rate</span></div></div>
+        <div class="bank"><img class="flag" src="https://flagcdn.com/w80/au.png" srcset="https://flagcdn.com/w160/au.png 2x" width="40" height="30" alt="Flag of Reserve Bank of Australia" loading="lazy" /><div><strong>Reserve Bank of Australia</strong><span><span class="code">AUD</span> · Cash Rate</span></div></div>
+        <div class="bank"><img class="flag" src="https://flagcdn.com/w80/ch.png" srcset="https://flagcdn.com/w160/ch.png 2x" width="40" height="30" alt="Flag of Swiss National Bank" loading="lazy" /><div><strong>Swiss National Bank</strong><span><span class="code">CHF</span> · Policy Rate</span></div></div>
+        <div class="bank"><img class="flag" src="https://flagcdn.com/w80/nz.png" srcset="https://flagcdn.com/w160/nz.png 2x" width="40" height="30" alt="Flag of Reserve Bank of New Zealand" loading="lazy" /><div><strong>Reserve Bank of New Zealand</strong><span><span class="code">NZD</span> · Official Cash Rate</span></div></div>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <span>Triko Alerts</span> ·
+      <a href="privacy.html">Privacy Policy</a> ·
+      <a href="#" onclick="try{localStorage.removeItem('cookie_consent')}catch(e){};location.reload();return false;">Cookie settings</a>
+    </footer>
+  </div>
+  <script>
+    // Cookie consent (shared with the rates page via localStorage on the same domain)
+    (function () {
+      const banner = document.getElementById("cookieBanner");
+      const KEY = "cookie_consent";
+      let saved = null;
+      try { saved = localStorage.getItem(KEY); } catch (e) {}
+      function lock(on) { document.documentElement.classList.toggle("cookie-open", on); document.body.classList.toggle("cookie-open", on); }
+      if (!saved) { banner.hidden = false; lock(true); }
+
+      function save(value) {
+        try { localStorage.setItem(KEY, value); } catch (e) {}
+        if (typeof gtag === "function") {
+          gtag("consent", "update", { analytics_storage: value === "accepted" ? "granted" : "denied" });
+        }
+        banner.hidden = true;
+        lock(false);
+      }
+      document.getElementById("cookieAccept").addEventListener("click", () => save("accepted"));
+      document.getElementById("cookieDecline").addEventListener("click", () => save("declined"));
+    })();
+  </script>
+</body>
+</html>

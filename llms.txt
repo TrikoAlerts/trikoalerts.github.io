@@ -1,0 +1,14 @@
+# Interest Rate Probability
+
+> Market-implied probabilities of a rate cut, hold or hike at the upcoming meetings of eight major central banks. Probabilities are calculated from the OIS (Overnight Index Swap) market and updated every 30 seconds. Operated by Triko Alerts.
+
+The site covers the Federal Reserve (USD), European Central Bank (EUR), Bank of England (GBP), Bank of Japan (JPY), Bank of Canada (CAD), Reserve Bank of Australia (AUD), Swiss National Bank (CHF) and Reserve Bank of New Zealand (NZD). For each meeting it shows the probability of a cut, hold or hike, the expected change in basis points and the cumulative change from today's rate.
+
+## Pages
+
+- [Home](https://trikoalerts.github.io/): What the site is and which central banks are covered.
+- [Interest Rate Probability](https://trikoalerts.github.io/interest-rate-probability.html): Live table of cut, hold and hike probabilities for each upcoming meeting of the eight central banks, with a short guide on how to read it and an FAQ.
+
+## Optional
+
+- [Privacy Policy](https://trikoalerts.github.io/privacy.html): What data is collected, cookies and Google Analytics.
