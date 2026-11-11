@@ -7,8 +7,8 @@ The site covers the Federal Reserve (USD), European Central Bank (EUR), Bank of 
 ## Pages
 
 - [Home](https://trikoalerts.github.io/): What the site is and which central banks are covered.
-- [Interest Rate Probability](https://trikoalerts.github.io/interest-rate-probability.html): Live table of cut, hold and hike probabilities for each upcoming meeting of the eight central banks, with a short guide on how to read it and an FAQ.
+- [Interest Rate Probability](https://trikoalerts.github.io/interest-rate-probability): Live table of cut, hold and hike probabilities for each upcoming meeting of the eight central banks, with a short guide on how to read it and an FAQ.
 
 ## Optional
 
-- [Privacy Policy](https://trikoalerts.github.io/privacy.html): What data is collected, cookies and Google Analytics.
+- [Privacy Policy](https://trikoalerts.github.io/privacy): What data is collected, cookies and Google Analytics.
