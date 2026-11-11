@@ -1,6 +1,0 @@
-# Interest Rate Probability
-
-> Market-implied hike, hold and cut probabilities for upcoming decisions of eight central banks (Federal Reserve, ECB, Bank of England, Bank of Japan, Bank of Canada, RBA, SNB, RBNZ), derived from OIS rates and updated every 30 seconds.
-
-## Main page
-- [Interest Rate Probability](https://trikoalerts.github.io/): probabilities of cut, hold and hike for every priced meeting
