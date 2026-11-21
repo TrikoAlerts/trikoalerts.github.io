@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
-  <title>Interest Rate Probability | FED ECB BOE BOJ BOC RBA SNB RBN</title>
+  <title>Interest Rate Probability And Real Interest Rate</title>
   <meta name="description" content="Market-implied hike, hold and cut probabilities for upcoming decisions of 8 major central banks, derived from OIS rates and updated every 30 seconds." />
   <meta name="keywords" content="interest rate probability, central bank rates, OIS, Fed rate hike odds, ECB rate expectations, Bank of England, Bank of Japan, rate cut probability" />
   <meta name="robots" content="index, follow" />
@@ -502,14 +502,14 @@
     // Real interest rate – wpisz ręcznie wartość w procentach dla każdego banku (np. 1.25).
     // Zostaw null, jeśli nie chcesz pokazywać wartości (wyświetli się „—”).
     const REAL_RATES = {
-      USD: null,
-      EUR: null,
-      GBP: null,
-      JPY: null,
-      CAD: null,
-      AUD: null,
-      CHF: null,
-      NZD: null,
+      USD: 0,775%,
+      EUR: -1,5%,
+      GBP: 0,40%,
+      JPY: -1,05%,
+      CAD: -0,60%,
+      AUD: 0,55%,
+      CHF: -1,50%,
+      NZD: -0,95%,
     };
     const realRate = (m) => REAL_RATES[m.currency];
 
