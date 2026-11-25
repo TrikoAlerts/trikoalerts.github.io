@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Currency Pair Sentiment (bp)</title>
+  <meta name="description" content="Currency pair sentiment based on the expected policy-rate change in basis points at the next central bank meeting." />
+  <meta name="robots" content="index, follow" />
+  <meta name="author" content="Triko Alerts" />
+  <style>
+    :root {
+      --bg: #0b1220; --card: #121a2b; --inner: #0d1524; --border: #1e2a42;
+      --text: #e8eef9; --muted: #8b9bb8; --accent: #93c5fd;
+      --up: #22c55e; --down: #ef4444; --flat: #8b9bb8; --warn: #eab308;
+      --radius: 16px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { max-width: 100%; overflow-x: hidden; }
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg); color: var(--text); line-height: 1.5; min-height: 100vh;
+      padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right);
+    }
+    .container { max-width: 1100px; margin: 0 auto; padding: 24px 16px 48px; }
+    header { text-align: center; margin-bottom: 20px; padding-top: 8px; }
+    header h1 { font-size: clamp(1.4rem, 4vw, 2rem); font-weight: 700; margin-bottom: 8px; }
+    header p { color: var(--muted); font-size: 0.92rem; max-width: 720px; margin: 0 auto; }
+    .meta { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+    .badge { display: inline-block; background: #1e3a5f; color: var(--accent); font-size: 0.72rem; padding: 4px 10px; border-radius: 999px; }
+    .badge.live { background: #14532d; color: #86efac; }
+    .badge.error { background: #7f1d1d; color: #fca5a5; }
+    .badge.alert { background: #3f3510; color: #fde68a; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; margin-bottom: 18px; }
+    .card h2 { font-size: 1.05rem; margin-bottom: 10px; }
+    .card h2.center { text-align: center; }
+    .table-wrap { overflow-x: auto; border-radius: 12px; background: var(--inner); }
+    table { width: 100%; border-collapse: collapse; font-size: 0.86rem; font-variant-numeric: tabular-nums; }
+    th, td { padding: 8px 10px; text-align: right; white-space: nowrap; border-bottom: 1px solid #172033; }
+    th { color: var(--muted); font-weight: 500; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; background: #0f182a; }
+    th:first-child, td:first-child { text-align: left; }
+    td.pair { color: var(--accent); font-weight: 600; }
+    td.sent.up { color: var(--up); font-weight: 700; }
+    td.sent.down { color: var(--down); font-weight: 700; }
+    td.sent.flat { color: var(--flat); }
+    tr.changed td { background: #2a2410; }
+    tr.changed td.alert { color: var(--warn); font-weight: 700; }
+    .bp.up { color: var(--up); }
+    .bp.down { color: var(--down); }
+    .bp.flat { color: var(--muted); }
+    .na { color: var(--muted); font-style: italic; text-align: center; }
+    .status-msg { text-align: center; padding: 40px 20px; color: var(--muted); }
+    .note { font-size: 0.82rem; color: var(--muted); margin-top: 14px; }
+    .note strong { color: var(--text); }
+    .cflag { display: inline-block; width: 18px; height: 13px; border-radius: 2px; box-shadow: 0 0 0 1px #2a3a5a; object-fit: cover; vertical-align: -1px; margin-right: 6px; }
+    @media (max-width: 640px) {
+      .container { padding: 16px 10px 36px; }
+      table { font-size: 0.78rem; }
+      th, td { padding: 6px 7px; }
+      th { font-size: 0.66rem; }
+    }
+    /* Cookie consent – wyśrodkowany na ekranie (telefony i tablety) */
+    .cookie-overlay {
+      position: fixed;
+      top: 0; right: 0; bottom: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      height: 100vh;
+      height: 100dvh;
+      background: rgba(0, 0, 0, 0.6);
+      display: grid;
+      place-items: center;
+      padding: 16px;
+      z-index: 2147483000;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      -webkit-transform: translateZ(0);
+      transform: translateZ(0);
+    }
+    .cookie-overlay[hidden] { display: none; }
+    html.cookie-open, body.cookie-open { overflow: hidden; }
+    .cookie-box {
+      position: relative;
+      margin: auto;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      max-width: 460px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      text-align: center;
+    }
+    .cookie-box h2 { font-size: 1.1rem; margin-bottom: 10px; }
+    .cookie-box p { color: var(--muted); font-size: 0.88rem; margin-bottom: 18px; }
+    .cookie-box a { color: var(--accent); }
+    .cookie-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+    .cookie-actions button {
+      font: inherit; font-size: 0.9rem; font-weight: 600; cursor: pointer;
+      padding: 10px 18px; border-radius: 999px; border: 1px solid var(--border);
+      background: transparent; color: var(--text); min-width: 120px;
+    }
+    .cookie-actions button.accept { background: #1e3a5f; border-color: #1e3a5f; color: var(--accent); }
+    .cookie-actions button:hover { opacity: 0.85; }
+
+    @media (max-width: 640px) {
+      .cookie-box { padding: 20px 18px; }
+      .cookie-actions button { flex: 1 1 0; min-width: 0; }
+    }
+
+    .site-footer { margin-top: 36px; padding-top: 18px; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.78rem; text-align: center; }
+    .site-footer a { color: var(--muted); text-decoration: none; margin: 0 6px; }
+    .site-footer a:hover { color: var(--accent); text-decoration: underline; }
+    .pair-cta {
+      display: inline-flex; align-items: center; gap: 8px; margin: 14px auto 0;
+      padding: 9px 18px; border-radius: 999px; text-decoration: none;
+      font-size: 0.9rem; font-weight: 600; color: #0b1220;
+      background: linear-gradient(135deg, #93c5fd, #60a5fa);
+      box-shadow: 0 6px 18px rgba(96, 165, 250, 0.25);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .pair-cta:hover { transform: translateY(-1px); box-shadow: 0 10px 24px rgba(96, 165, 250, 0.35); }
+    .pair-cta .arrow { transition: transform 0.15s ease; }
+    .pair-cta:hover .arrow { transform: translateX(3px); }
+    .vix-widget { display: inline-flex; flex-wrap: wrap; align-items: baseline; justify-content: center; gap: 8px; margin: 12px auto 0; padding: 8px 16px; border: 1px solid var(--border); border-radius: 999px; background: var(--inner); font-size: 0.86rem; }
+    .vix-widget .vix-label { color: var(--muted); font-weight: 600; letter-spacing: 0.04em; }
+    .vix-widget .vix-value { font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text); }
+    .vix-widget .vix-change { font-variant-numeric: tabular-nums; }
+    .vix-widget .vix-change.up { color: var(--down); }
+    .vix-widget .vix-change.down { color: var(--up); }
+    .vix-widget .vix-time { color: var(--muted); font-size: 0.74rem; }
+    .vix-regime { font-weight: 700; letter-spacing: 0.03em; }
+    .vix-regime.on { color: #4ade80; }
+    .vix-regime.neutral { color: #2f9e66; }
+    .vix-regime.off { color: #f38b8b; }
+    .vix-regime.strong { color: #e25555; }
+    .vix-regime.extreme { color: #c93a3a; }
+    .vix-desc { text-align: center; color: var(--muted); font-size: 0.82rem; margin-top: 6px; }
+    .adv.up { color: var(--up); font-weight: 700; }
+    .adv.down { color: var(--down); font-weight: 700; }
+    .adv.flat { color: var(--flat); font-weight: 700; }
+    .mv-time { color: var(--muted); font-size: 0.7rem; margin-top: 2px; }
+    td.chg { color: var(--warn); }
+  </style>
+  <!-- Google Analytics (Consent Mode v2) -->
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    gtag('consent', 'default', {
+      analytics_storage: 'denied',
+      ad_storage: 'denied',
+      ad_user_data: 'denied',
+      ad_personalization: 'denied'
+    });
+    try {
+      if (localStorage.getItem('cookie_consent') === 'accepted') {
+        gtag('consent', 'update', { analytics_storage: 'granted' });
+      }
+    } catch (e) {}
+  </script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-CV4V4Q5GC5"></script>
+  <script>
+    gtag('js', new Date());
+    gtag('config', 'G-CV4V4Q5GC5');
+  </script>
+  <link rel="canonical" href="https://trikoalerts.github.io/currency-pair-sentiment" />
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": "Currency Pair Sentiment (bp)",
+  "description": "Currency pair sentiment based on the expected policy-rate change in basis points at the next central bank meeting, comparing base and quote currencies for major FX pairs.",
+  "url": "https://trikoalerts.github.io/currency-pair-sentiment",
+  "inLanguage": "en",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "Triko Alerts",
+    "url": "https://trikoalerts.github.io/"
+  },
+  "author": {
+    "@type": "Organization",
+    "name": "Triko Alerts"
+  },
+  "keywords": ["currency pair sentiment", "FX pair sentiment", "central bank rate expectations", "policy rate change basis points", "rate differential", "forex sentiment", "OIS", "interest rate probability"],
+  "about": [
+    { "@type": "Thing", "name": "Foreign exchange market", "sameAs": "https://en.wikipedia.org/wiki/Foreign_exchange_market" },
+    { "@type": "Thing", "name": "Interest rate differential", "sameAs": "https://en.wikipedia.org/wiki/Interest_rate_parity" },
+    { "@type": "Thing", "name": "Monetary policy", "sameAs": "https://en.wikipedia.org/wiki/Monetary_policy" },
+    { "@type": "Thing", "name": "Overnight index swap", "sameAs": "https://en.wikipedia.org/wiki/Overnight_indexed_swap" }
+  ],
+  "mainEntity": {
+    "@type": "Dataset",
+    "name": "Currency pair sentiment (bp)",
+    "description": "Expected policy-rate change in basis points at the next central bank meeting for the base and quote currency of each pair, with the resulting sentiment direction (up, down or flat) and flags when the direction changes.",
+    "creator": { "@type": "Organization", "name": "Triko Alerts" },
+    "isAccessibleForFree": true,
+    "measurementTechnique": "Market-implied policy-rate expectations derived from OIS rates",
+    "variableMeasured": "Expected policy-rate change (bp) at the next meeting",
+    "temporalCoverage": "Updated continuously"
+  }
+}
+  </script>
+</head>
+<body>
+  <div id="cookieBanner" class="cookie-overlay" role="dialog" aria-modal="true" aria-labelledby="cookieTitle" hidden>
+    <div class="cookie-box">
+      <h2 id="cookieTitle">Cookies</h2>
+      <p>We use cookies to measure traffic and improve this site. You can accept or decline analytics cookies. More information is available in our <a href="/privacy">privacy policy</a>.</p>
+      <div class="cookie-actions">
+        <button type="button" id="cookieDecline">Decline</button>
+        <button type="button" id="cookieAccept" class="accept">Accept</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <header>
+      <h1>Currency Pair Sentiment (bp)</h1>
+      <p>Shows the change in expected policy-rate (bp) of each currency since its last move. The advantage goes to the currency whose last move was stronger than the other one's, taking the pair's base minus quote. The date of the last advantage change stays visible until the next change.</p>
+      <a class="pair-cta" href="/interest-rate-probability.html">Interest Rate Probability <span class="arrow">→</span></a>
+      <div class="vix-widget" id="vixWidget" aria-live="polite">
+        <span class="vix-label">VIX</span>
+        <span class="vix-value" id="vixValue">…</span>
+        <span class="vix-change" id="vixChange"></span>
+        <span class="vix-regime" id="vixRegime"></span>
+    <span class="vix-time" id="vixTime"></span>
+      </div>
+      <p class="vix-desc" id="vixDesc"></p>
+      <div class="meta">
+        <span id="statusBadge" class="badge">loading…</span>
+        <span id="valuationBadge" class="badge" style="display:none"></span>
+        <span id="lastUpdateBadge" class="badge" style="display:none"></span>
+        <span id="changeBadge" class="badge alert" style="display:none"></span>
+      </div>
+    </header>
+
+    <section class="card">
+      <h2 class="center">Currency Pairs</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Pair</th><th>Base (bp)</th><th>Quote (bp)</th><th>Base move</th><th>Quote move</th><th>Advantage</th><th>Advantage since</th>
+            </tr>
+          </thead>
+          <tbody id="pairsBody"><tr><td colspan="7" class="na">Loading…</td></tr></tbody>
+        </table>
+      </div>
+      <p class="note">
+        <strong>Base / Quote (bp)</strong> = current expected policy-rate change. <strong>Move</strong> = change since the currency's previous move (at least 0.1 bp), with the time it happened. <strong>Advantage</strong> = the currency that moved more in its favour (base move minus quote move); the arrow shows its own direction. <strong>Advantage since</strong> = when this advantage last changed, shown until the next change. Last values are stored in this browser.
+      </p>
+    </section>
+
+    <footer class="site-footer">
+      <span>Triko Alerts</span> ·
+      <a href="/privacy">Privacy Policy</a> ·
+      <a href="#" onclick="try{localStorage.removeItem('cookie_consent')}catch(e){};location.reload();return false;">Cookie settings</a>
+    </footer>
+  </div>
+
+  <script>
+    // Cookie consent
+    (function () {
+      const banner = document.getElementById("cookieBanner");
+      const KEY = "cookie_consent";
+      let saved = null;
+      try { saved = localStorage.getItem(KEY); } catch (e) {}
+      function lock(on) { document.documentElement.classList.toggle("cookie-open", on); document.body.classList.toggle("cookie-open", on); }
+      if (!saved) { banner.hidden = false; lock(true); }
+
+      function save(value) {
+        try { localStorage.setItem(KEY, value); } catch (e) {}
+        if (typeof gtag === "function") {
+          gtag("consent", "update", { analytics_storage: value === "accepted" ? "granted" : "denied" });
+        }
+        banner.hidden = true;
+        lock(false);
+      }
+      document.getElementById("cookieAccept").addEventListener("click", () => save("accepted"));
+      document.getElementById("cookieDecline").addEventListener("click", () => save("declined"));
+    })();
+
+    // Same Cloudflare Worker as the main page. The API key is stored only on the Worker.
+    const API_URL = "https://server.serverserver.workers.dev";
+    const POLL_MS = 30_000;
+    const MAX_HORIZON = 36;
+    const BASE_KEY = "pair_bp_base_v2";   // last recorded bp per currency
+    const MOVE_KEY = "pair_bp_moves_v2";  // last move per currency: { d, at }
+    const ADV_KEY = "pair_bp_adv_v2";     // advantage per pair: { adv, at }
+    const MOVE_MIN = 0.1;                 // smallest bp change counted as a move
+    // Market convention order: the first currency in a pair is the base, e.g. EUR/USD, AUD/JPY.
+    const ORDER = ["EUR", "GBP", "AUD", "NZD", "USD", "CAD", "CHF", "JPY"];
+    // Flags from flagcdn.com (same source as the main page).
+    const FLAGS = { USD: "us", EUR: "eu", GBP: "gb", JPY: "jp", CAD: "ca", AUD: "au", CHF: "ch", NZD: "nz" };
+
+    let pollTimer = null;
+    let inFlight = false;
+
+    const isNum = (v) => typeof v === "number" && isFinite(v);
+    const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+    function fmtBp(n) {
+      if (!isNum(n)) return `<span class="bp flat">—</span>`;
+      const r = Math.round(n * 10) / 10;
+      const cls = r > 0 ? "up" : r < 0 ? "down" : "flat";
+      const sign = r > 0 ? "+" : r < 0 ? "−" : "";
+      return `<span class="bp ${cls}">${sign}${Math.abs(r).toFixed(1)} bp</span>`;
+    }
+
+    // Expected change in bp at the next meeting with a valuation.
+    function nextBp(m) {
+      const priced = (m.meetings || []).filter((mt) => isNum(mt.hold_probability) || isNum(mt.implied_change_bp));
+      const first = priced[0];
+      return first && isNum(first.implied_change_bp) ? first.implied_change_bp : null;
+    }
+
+    function loadJson(key) {
+      try { return JSON.parse(localStorage.getItem(key)) || {}; } catch { return {}; }
+    }
+    function saveJson(key, obj) {
+      try { localStorage.setItem(key, JSON.stringify(obj)); } catch {}
+    }
+    function fmtWhen(iso) {
+      try {
+        return new Date(iso).toLocaleString("en-GB", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" });
+      } catch { return iso; }
+    }
+
+    function render(bpByCcy) {
+      const now = new Date().toISOString();
+      const base = loadJson(BASE_KEY);
+      const moves = loadJson(MOVE_KEY);
+      const adv = loadJson(ADV_KEY);
+      let changes = 0;
+
+      // 1) Detect moves: a currency's bp value changed by at least MOVE_MIN since its last recorded value.
+      for (const c of ORDER) {
+        const v = bpByCcy[c];
+        if (!isNum(v)) continue;
+        if (!isNum(base[c])) { base[c] = v; continue; }
+        const d = v - base[c];
+        if (Math.abs(d) >= MOVE_MIN) {
+          moves[c] = { d, at: now };
+          base[c] = v;
+        }
+      }
+
+      const mvCell = (m) => m
+        ? `${fmtBp(m.d)}<div class="mv-time">${fmtWhen(m.at)}</div>`
+        : `<span class="na">—</span>`;
+
+      // 2) Pair advantage: base last move minus quote last move.
+      const rows = [];
+      for (let i = 0; i < ORDER.length; i++) {
+        for (let j = i + 1; j < ORDER.length; j++) {
+          const b = ORDER[i], q = ORDER[j];
+          const pair = `${b}/${q}`;
+          const mb = moves[b], mq = moves[q];
+
+          if (mb || mq) {
+            const diff = (mb ? mb.d : 0) - (mq ? mq.d : 0);
+            const cur = diff > 0.05 ? b : diff < -0.05 ? q : "=";
+            const prev = adv[pair];
+            if (!prev || prev.adv !== cur) {
+              if (prev) changes++;
+              const stamp = [mb?.at, mq?.at].filter(Boolean).sort().pop();
+              adv[pair] = { adv: cur, at: stamp };
+            }
+          }
+
+          const state = adv[pair];
+          let advHtml = `<span class="na">—</span>`;
+          if (state && state.adv === "=") {
+            advHtml = `<span class="adv flat">=</span>`;
+          } else if (state) {
+            const own = moves[state.adv] ? moves[state.adv].d : 0;
+            const cls = own > 0.05 ? "up" : own < -0.05 ? "down" : "flat";
+            const arrow = own > 0.05 ? "▲" : own < -0.05 ? "▼" : "=";
+            advHtml = `<span class="adv ${cls}">${state.adv} ${arrow}</span>`;
+          }
+
+          rows.push(`<tr>
+            <td class="pair">${pair}</td>
+            <td>${fmtBp(bpByCcy[b])}</td>
+            <td>${fmtBp(bpByCcy[q])}</td>
+            <td>${mvCell(mb)}</td>
+            <td>${mvCell(mq)}</td>
+            <td>${advHtml}</td>
+            <td class="chg">${state && state.at ? fmtWhen(state.at) : "—"}</td>
+          </tr>`);
+        }
+      }
+
+      document.getElementById("pairsBody").innerHTML = rows.join("");
+
+      saveJson(BASE_KEY, base);
+      saveJson(MOVE_KEY, moves);
+      saveJson(ADV_KEY, adv);
+
+      const cb = document.getElementById("changeBadge");
+      if (changes > 0) {
+        cb.style.display = "inline-block";
+        cb.textContent = `⚠ advantage changes: ${changes}`;
+      } else {
+        cb.style.display = "none";
+      }
+    }
+
+    async function loadData(isBackground = false) {
+      if (inFlight) return;
+      inFlight = true;
+      const badge = document.getElementById("statusBadge");
+      const valBadge = document.getElementById("valuationBadge");
+      const lastBadge = document.getElementById("lastUpdateBadge");
+      if (!isBackground) { badge.className = "badge"; badge.textContent = "loading…"; }
+
+      try {
+        const res = await fetch(`${API_URL.replace(/\/+$/, "")}/matrix?horizon_months=${MAX_HORIZON}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        const list = Array.isArray(data.matrices) ? data.matrices : Array.isArray(data) ? data : [data];
+
+        const bpByCcy = {};
+        for (const m of list) bpByCcy[m.currency] = nextBp(m);
+        render(bpByCcy);
+
+        badge.className = "badge live";
+        badge.textContent = "● LIVE (every 30 s)";
+        const vt = data.valuation_time || list[0]?.valuation_time;
+        if (vt) {
+          valBadge.style.display = "inline-block";
+          valBadge.textContent = "valuation: " + new Date(vt.endsWith("Z") ? vt : vt + "Z").toLocaleString("en-GB");
+        }
+        lastBadge.style.display = "inline-block";
+        lastBadge.textContent = "updated: " + new Date().toLocaleTimeString("en-GB");
+      } catch (err) {
+        console.error(err);
+        badge.className = "badge error";
+        badge.textContent = "API error";
+        document.getElementById("pairsBody").innerHTML = `<tr><td colspan="7" class="status-msg">Failed to load data.<br><small>${esc(err.message)}</small></td></tr>`;
+      } finally {
+        inFlight = false;
+      }
+    }
+
+    function startPolling() {
+      loadData(false);
+      if (pollTimer) clearInterval(pollTimer);
+      pollTimer = setInterval(() => loadData(true), POLL_MS);
+    }
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) { if (pollTimer) clearInterval(pollTimer); pollTimer = null; }
+      else startPolling();
+    });
+    startPolling();
+  </script>
+  <script>
+  (function () {
+    var SYMBOL = "%5EVIX";
+    var SOURCE = "https://query1.finance.yahoo.com/v8/finance/chart/" + SYMBOL + "?range=1d&interval=1d";
+    var PROXY = "https://serverserver.serverserver.workers.dev/?url="; // Cloudflare Worker proxy (Yahoo Finance CORS workaround)
+    var REFRESH_MS = 60000;
+    var el = {
+      value: document.getElementById("vixValue"),
+      change: document.getElementById("vixChange"),
+      time: document.getElementById("vixTime"),
+      regime: document.getElementById("vixRegime"),
+      desc: document.getElementById("vixDesc")
+    };
+
+    function regimeFor(v) {
+      if (v < 15) return { label: "RISK ON", cls: "on", range: "0–15", desc: "Low expected volatility, relatively calm market." };
+      if (v < 20) return { label: "RISK ON / NEUTRAL", cls: "neutral", range: "15–20", desc: "Normal or moderate uncertainty." };
+      if (v < 30) return { label: "RISK OFF", cls: "off", range: "20–30", desc: "Elevated uncertainty and greater risk aversion." };
+      if (v < 40) return { label: "STRONG RISK OFF", cls: "strong", range: "30–40", desc: "Strong market stress." };
+      return { label: "EXTREME RISK OFF", cls: "extreme", range: "40+", desc: "Extreme volatility and market fear." };
+    }
+
+    function render(price, prev) {
+      el.value.textContent = price.toFixed(2);
+      var diff = price - prev;
+      var pct = prev ? (diff / prev) * 100 : 0;
+      var sign = diff >= 0 ? "+" : "";
+      el.change.textContent = sign + pct.toFixed(2) + "%";
+      el.change.className = "vix-change " + (diff > 0 ? "up" : diff < 0 ? "down" : "");
+      el.time.textContent = "· " + new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      var r = regimeFor(price);
+      el.regime.textContent = r.label;
+      el.regime.className = "vix-regime " + r.cls;
+      el.desc.textContent = r.desc + " (VIX " + r.range + ")";
+    }
+
+    function fail() {
+      el.value.textContent = "n/a";
+      el.change.textContent = "";
+      el.time.textContent = "· data unavailable";
+      el.regime.textContent = "";
+      el.desc.textContent = "";
+    }
+
+    async function load() {
+      try {
+        var res = await fetch(PROXY ? PROXY + encodeURIComponent(SOURCE) : SOURCE, { cache: "no-store" });
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        var json = await res.json();
+        var meta = json.chart.result[0].meta;
+        var price = meta.regularMarketPrice;
+        var prev = meta.chartPreviousClose || meta.previousClose;
+        if (typeof price !== "number") throw new Error("no price");
+        render(price, prev);
+      } catch (e) {
+        console.warn("VIX load failed (Yahoo Finance direct requests are often blocked by CORS; set PROXY):", e);
+        fail();
+      }
+    }
+
+    load();
+    setInterval(load, REFRESH_MS);
+  })();
+  </script>
+</body>
+</html>
