@@ -245,7 +245,7 @@
         </table>
       </div>
       <p class="note">
-        <strong>Difference (bp)</strong> = base bp minus quote bp, with the date and time of its last sentiment change below it. <strong>Base move / Quote move</strong> = how much each currency's bp has risen (▲) or fallen (▼) since 00:00 Warsaw time today, with the time its value last moved. <strong>DIFFERENCE MOVE</strong> = base move minus quote move in bp, with the time of the latest move. <strong>MOVE SENTIMENT</strong> = arrow only: ▲ if the advantage is with the base currency, ▼ if it is with the quote currency, = if equal, with the date and time of its last change. Dates stay visible until the next change. <strong>DAY DIFFERENCE MOVE</strong> = the DIFFERENCE MOVE of one whole day, closed once at 00:00 Warsaw time (date and time shown) and kept until the next close. It is not accumulated across days. Values are calculated and stored on the server (Cloudflare Worker), not in your browser.
+        <strong>Difference (bp)</strong> = base bp minus quote bp, with the date and time of its last sentiment change below it. <strong>Base move / Quote move</strong> = how much each currency's bp has risen (▲) or fallen (▼) since 00:00 Warsaw time today, with the time its value last moved. <strong>DIFFERENCE MOVE</strong> = base move minus quote move in bp, with the time of the latest move. <strong>MOVE SENTIMENT</strong> = arrow only: ▲ if the advantage is with the base currency, ▼ if it is with the quote currency, = if equal, with the date and time of its last change. Dates stay visible until the next change. The highlighted row is the pair with the largest DAY DIFFERENCE MOVE. <strong>DAY DIFFERENCE MOVE</strong> = the DIFFERENCE MOVE of one whole day, closed once at 00:00 Warsaw time (date and time shown) and kept until the next close. It is not accumulated across days. Values are calculated and stored on the server (Cloudflare Worker), not in your browser.
       </p>
     </section>
 
@@ -329,6 +329,11 @@
         const cls = r.daySign === "▲" ? "up" : r.daySign === "▼" ? "down" : "flat";
         return `<span class="adv ${cls}">${r.daySign}</span> ${fmtBp(r.dayDm)}<div class="mv-time">${fmtWhen(r.dayAt)}</div>`;
       };
+      // Highlight the pair(s) with the largest DAY DIFFERENCE MOVE (by absolute value)
+      const dayVals = rows.filter((r) => r.dayDm != null).map((r) => Math.abs(r.dayDm));
+      const maxDay = dayVals.length ? Math.max(...dayVals) : 0;
+      const isTop = (r) => r.dayDm != null && maxDay > 0 && Math.abs(r.dayDm) === maxDay;
+
       document.getElementById("pairsBody").innerHTML = rows.map((r) => {
         const sentCls = r.sign === "▲" ? "up" : r.sign === "▼" ? "down" : "flat";
         const sentTxt = r.sign ?? `<span class="na">no data</span>`;
@@ -336,7 +341,7 @@
         const advHtml = r.adv === "="
           ? `<span class="adv flat">=</span>`
           : `<span class="adv ${r.adv === baseCcy ? "up" : "down"}">${r.adv === baseCcy ? "▲" : "▼"}</span>`;
-        return `<tr class="${r.diffAt ? "changed" : ""}">
+        return `<tr class="${isTop(r) ? "changed" : ""}">
           <td class="pair">${r.pair}</td>
           <td>${fmtBp(r.base)}</td>
           <td>${fmtBp(r.quote)}</td>
