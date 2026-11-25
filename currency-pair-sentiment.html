@@ -36,6 +36,8 @@
     .table-wrap { overflow-x: auto; border-radius: 12px; background: var(--inner); }
     table { width: 100%; border-collapse: collapse; font-size: 0.86rem; font-variant-numeric: tabular-nums; }
     th, td { padding: 8px 10px; text-align: right; white-space: nowrap; border-bottom: 1px solid #172033; }
+    th:nth-child(5), td:nth-child(5), th:nth-child(6), td:nth-child(6), th:nth-child(7), td:nth-child(7),
+    th:nth-child(8), td:nth-child(8), th:nth-child(9), td:nth-child(9) { text-align: center; }
     th { color: var(--muted); font-weight: 500; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; background: #0f182a; }
     th:first-child, td:first-child { text-align: left; }
     td.pair { color: var(--accent); font-weight: 600; }
@@ -323,7 +325,7 @@
       const t = wrap && wrap.querySelector("table");
       if (!t) return;
       t.style.zoom = 1;
-      if (window.innerWidth < 900) return;
+      if (window.innerWidth < 600) return;
       const natural = t.offsetWidth;
       const avail = wrap.clientWidth;
       t.style.zoom = natural > avail ? (avail / natural).toFixed(4) : 1;
@@ -336,7 +338,7 @@
         ? `<span class="adv up">▲</span>`
         : v < -0.05 ? `<span class="adv down">▼</span>` : `<span class="adv flat">=</span>`;
       const at = (iso) => iso ? `<div class="mv-time">${fmtWhen(iso)}</div>` : "";
-      const mv = (m) => { const v = r1(m.d); return `${trend(v)} ${fmtBp(v)}${at(m.at)}`; };
+      const mv = (m) => { const v = r1(m.d); return `${fmtBp(v)}${at(m.at)}`; };
 
       const dayCell = (r) => {
         if (r.dayDm == null) return "";
