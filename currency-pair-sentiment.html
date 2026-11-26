@@ -173,10 +173,15 @@
     .pair-search input::placeholder, #histPair::placeholder { color: var(--muted); }
     .hist-controls select, .hist-controls button { background: var(--inner); color: var(--text); border: 1px solid var(--border); border-radius: 999px; padding: 6px 14px; font-size: 0.82rem; cursor: pointer; font-family: inherit; }
     .hist-controls button.active { background: #1e3a5f; color: var(--accent); border-color: #2a4a75; }
-    .hist-stats { display: flex; flex-wrap: wrap; gap: 8px 22px; justify-content: center; font-size: 0.84rem; color: var(--muted); margin-bottom: 8px; }
+    .hist-stats { display: flex; flex-wrap: wrap; gap: 8px 22px; justify-content: center; font-size: 0.84rem; color: var(--muted); margin-bottom: 8px; min-height: 20px; }
     .hist-stats strong { font-variant-numeric: tabular-nums; }
-    .hist-chart { position: relative; width: 100%; background: var(--inner); border-radius: 12px; padding: 8px 4px 2px; }
+    /* The box has the same proportions as the drawing, so it keeps its height while "Loading…" is shown and does not jump when data arrives */
+    .hist-chart { position: relative; width: 100%; background: var(--inner); border-radius: 12px; padding: 0; aspect-ratio: 340 / 340; }
+    @media (min-width: 600px) and (max-width: 1023px) { .hist-chart { aspect-ratio: 900 / 310; } }
+    @media (min-width: 1024px) { .hist-chart { aspect-ratio: 900 / 260; } }
+    .hist-chart .status-msg { padding: 0; display: flex; align-items: center; justify-content: center; height: 100%; }
     .hist-chart svg { display: block; width: 100%; height: auto; }
+    .hist-scroll { overflow: hidden; }
     .hist-chart .bar { transition: opacity .15s; }
     .hist-chart .bar:hover { opacity: .7; }
     .hist-cursor { stroke: var(--accent); stroke-width: 1; stroke-dasharray: 4 3; opacity: 0; pointer-events: none; }
@@ -406,6 +411,11 @@
       t.style.zoom = natural > avail ? (avail / natural).toFixed(4) : 1;
     }
     window.addEventListener("resize", fitTable);
+    let histResizeTimer = null;
+    window.addEventListener("resize", () => {
+      clearTimeout(histResizeTimer);
+      histResizeTimer = setTimeout(() => { if (typeof histAll !== "undefined" && histAll.length) applyHistRange(); }, 150);
+    });
 
     // Sorting: click a header = largest → smallest, click again = smallest → largest, third click = original order.
     let sortKey = null, sortDir = "desc", lastRows = [];
@@ -510,7 +520,9 @@
       note.textContent = "Each bar is the DIFFERENCE MOVE of one whole day, closed at 00:00 Warsaw time and saved automatically in Cloudflare. Green = advantage for the base currency, red = for the quote currency. Hover a bar for its date.";
       if (!data.length) { box.innerHTML = `<div class="status-msg">${emptyMsg || "No history yet. The first bar appears after the next 00:00 close."}</div>`; stats.innerHTML = ""; return; }
 
-      const W = 900, H = 260, L = 46, R = 10, T = 14, B = 10;
+      // Phones and tablets: a narrower, taller drawing area that fits the card width (like etf.com); desktop keeps the wide layout
+      const phone = window.innerWidth < 600, tablet = !phone && window.innerWidth < 1024;
+      const W = phone ? 340 : 900, H = phone ? 340 : tablet ? 310 : 260, L = phone ? 40 : 46, R = 10, T = 14, B = 10;
       const iw = W - L - R, ih = H - T - B;
       const maxAbs = Math.max(1, ...data.map((d) => Math.abs(d.v)));
       const step = maxAbs <= 5 ? 1 : maxAbs <= 10 ? 2 : maxAbs <= 25 ? 5 : maxAbs <= 50 ? 10 : 25;
@@ -533,8 +545,8 @@
         const r1 = Math.round(d.v * 10) / 10;
         return `<rect class="bar" x="${x}" y="${Math.min(y0, y1)}" width="${bw}" height="${Math.max(1, Math.abs(y1 - y0))}" rx="2" fill="${col}"><title>${d.date}: ${r1 > 0 ? "+" : ""}${r1.toFixed(1)} bp</title></rect>`;
       }).join("");
-      box.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Day difference move history">${g}${bars}`
-        + `<line class="hist-cursor" id="histCursor" x1="0" x2="0" y1="${T}" y2="${H - B}"/></svg><div class="hist-tip" id="histTip"></div>`;
+      box.innerHTML = `<div class="hist-scroll"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Day difference move history">${g}${bars}`
+        + `<line class="hist-cursor" id="histCursor" x1="0" x2="0" y1="${T}" y2="${H - B}"/></svg></div><div class="hist-tip" id="histTip"></div>`;
       attachHistHover(box, data, from ? dn(from) : dn(data[0].date), span, slot, bw, L, iw, W, H, T, B, y);
 
       const sum = data.reduce((a, d) => a + d.v, 0), pos = data.filter((d) => d.v > 0).length, neg = data.filter((d) => d.v < 0).length;
