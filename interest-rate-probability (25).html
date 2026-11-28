@@ -1,0 +1,1320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+  <title>Interest Rate Probability</title>
+  <meta name="description" content="Market-implied hike, hold and cut probabilities for upcoming decisions of 8 major central banks, derived from OIS rates and updated every 30 seconds." />
+  <meta name="keywords" content="interest rate probability, central bank rates, OIS, Fed rate hike odds, ECB rate expectations, Bank of England, Bank of Japan, rate cut probability" />
+  <meta name="robots" content="index, follow" />
+  <meta name="author" content="Triko Alerts" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Interest Rate Probability | Central Bank Hike, Cut &amp; Hold Odds" />
+  <meta property="og:description" content="Market-implied hike, hold and cut probabilities for upcoming decisions of 8 major central banks, derived from OIS rates and updated every 30 seconds." />
+  <meta property="og:url" content="https://trikoalerts.github.io/interest-rate-probability" />
+  <meta property="og:site_name" content="Interest Rate Probability" />
+  <meta property="og:locale" content="en_US" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Interest Rate Probability | Central Bank Hike, Cut &amp; Hold Odds" />
+  <meta name="twitter:description" content="Market-implied hike, hold and cut probabilities for upcoming decisions of 8 major central banks, derived from OIS rates and updated every 30 seconds." />
+
+  <style>
+    :root {
+      --bg: #0b1220;
+      --card: #121a2b;
+      --inner: #0d1524;
+      --border: #1e2a42;
+      --text: #e8eef9;
+      --muted: #8b9bb8;
+      --accent: #93c5fd;
+      --hike: #22c55e;
+      --hold: #eab308;
+      --cut: #ef4444;
+      --radius: 16px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { max-width: 100%; overflow-x: hidden; }
+    .container, .card, .table-wrap { max-width: 100%; min-width: 0; }
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+    .container { max-width: 1280px; margin: 0 auto; padding: 24px 16px 48px; }
+    header { text-align: center; margin-bottom: 24px; padding-top: 8px; }
+    header h1 { font-size: clamp(1.5rem, 4vw, 2.1rem); font-weight: 700; letter-spacing: -0.02em; margin-bottom: 8px; }
+    header p { color: var(--muted); font-size: 0.95rem; max-width: 720px; margin: 0 auto 10px; }
+    .meta { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center; margin-top: 10px; }
+    .badge { display: inline-block; background: #1e3a5f; color: var(--accent); font-size: 0.72rem; padding: 4px 10px; border-radius: 999px; }
+    .badge.live { background: #14532d; color: #86efac; }
+    .badge.error { background: #7f1d1d; color: #fca5a5; }
+    .badge.closed { background: #3f3f46; color: #d4d4d8; }
+    .tabs { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin: 18px 0 22px; }
+    .tabs a {
+      color: var(--muted); text-decoration: none; font-size: 0.8rem;
+      border: 1px solid var(--border); border-radius: 999px; padding: 4px 10px;
+    }
+    .tabs a:hover { color: var(--text); border-color: #2a3a5a; }
+    .pair-cta {
+      display: inline-flex; align-items: center; gap: 8px; margin: 14px auto 0;
+      padding: 9px 18px; border-radius: 999px; text-decoration: none;
+      font-size: 0.9rem; font-weight: 600; color: #0b1220;
+      background: linear-gradient(135deg, #93c5fd, #60a5fa);
+      box-shadow: 0 6px 18px rgba(96, 165, 250, 0.25);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .pair-cta:hover { transform: translateY(-1px); box-shadow: 0 10px 24px rgba(96, 165, 250, 0.35); }
+    .pair-cta .arrow { transition: transform 0.15s ease; }
+    .pair-cta:hover .arrow { transform: translateX(3px); }
+    .grid { display: grid; grid-template-columns: 1fr; gap: 18px; }
+    .card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 20px; scroll-margin-top: 16px;
+    }
+    .card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+    .bank-info h2 { font-size: 1.15rem; font-weight: 650; }
+    .bank-info .ccy { font-size: 0.78rem; color: var(--muted); }
+    .flag { line-height: 1; flex-shrink: 0; }
+    .flag-img { display: block; width: 40px; height: 30px; border-radius: 4px; box-shadow: 0 0 0 1px #2a3a5a; object-fit: cover; }
+    .tab-flag { display: inline-block; width: 18px; height: 13px; border-radius: 2px; vertical-align: -1px; margin-right: 2px; object-fit: cover; }
+    .facts { display: flex; flex-wrap: wrap; gap: 8px 22px; font-size: 0.86rem; margin-bottom: 14px; }
+    .facts .label { color: var(--muted); }
+    .facts .value { font-weight: 600; font-variant-numeric: tabular-nums; }
+    .pending { margin-bottom: 12px; padding: 8px 11px; border-radius: 10px; background: #2a2410; color: #fde68a; font-size: 0.82rem; }
+    .table-wrap { overflow-x: auto; border-radius: 12px; background: var(--inner); }
+    table { width: 100%; border-collapse: collapse; font-size: 0.84rem; font-variant-numeric: tabular-nums; }
+    th, td { padding: 8px 10px; text-align: right; white-space: nowrap; border-bottom: 1px solid #172033; }
+    th { color: var(--muted); font-weight: 500; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; background: #0f182a; position: sticky; top: 0; }
+    th:first-child, td:first-child, th:nth-child(2), td:nth-child(2) { text-align: left; }
+    tr:last-child td { border-bottom: none; }
+    tbody tr:hover td { background: #111b2e; }
+    td.date strong { color: var(--accent); font-weight: 600; }
+    td.hike { color: var(--hike); font-weight: 600; }
+    td.hold { color: var(--hold); font-weight: 600; }
+    td.cut  { color: var(--cut);  font-weight: 600; }
+    .bp.up   { color: var(--hike); }
+    .bp.down { color: var(--cut); }
+    .bp.flat { color: var(--muted); }
+    .base { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 0.74rem; font-weight: 600; }
+    .base.Hike { background: #14532d; color: #86efac; }
+    .base.Hold { background: #3f3510; color: #fde68a; }
+    .base.Cut  { background: #5b1a1a; color: #fca5a5; }
+    .prov { color: var(--hold); margin-left: 2px; }
+    .muted { color: var(--muted); }
+    td.na { color: var(--muted); font-style: italic; text-align: center; }
+    .status-msg { text-align: center; padding: 40px 20px; color: var(--muted); font-size: 0.95rem; }
+    .note {
+      margin-top: 24px; padding: 14px 16px; background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; font-size: 0.82rem; color: var(--muted);
+    }
+    .note strong { color: var(--text); }
+    .note ul { margin: 6px 0 0 18px; }
+    .note details { margin-top: 10px; }
+    .note summary { cursor: pointer; color: var(--accent); font-size: 0.85rem; }
+    .note details p { margin-top: 4px; }
+
+    /* Tablet */
+    html { -webkit-text-size-adjust: 100%; }
+    body { padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); }
+    .table-wrap { -webkit-overflow-scrolling: touch; }
+
+    @media (max-width: 1024px) {
+      .container { padding: 20px 14px 40px; }
+      .card { padding: 16px; }
+      th, td { padding: 7px 8px; }
+    }
+
+    /* Telefon */
+    @media (max-width: 640px) {
+      .container { padding: 16px 10px 36px; }
+      header { margin-bottom: 18px; }
+      header p { font-size: 0.88rem; }
+      .tabs { gap: 5px; margin: 14px 0 18px; }
+      .tabs a { font-size: 0.74rem; padding: 4px 8px; }
+      .card { padding: 14px; border-radius: 14px; }
+      .card-header { margin-bottom: 10px; }
+      .bank-info h2 { font-size: 1.02rem; }
+      .flag-img { width: 34px; height: 25px; }
+      .facts { gap: 6px 14px; font-size: 0.8rem; }
+      .facts > div { flex: 1 1 45%; }
+      .pending { font-size: 0.78rem; }
+      table { font-size: 0.78rem; }
+      th, td { padding: 6px 7px; }
+      th { font-size: 0.66rem; }
+      .table-wrap { -webkit-overflow-scrolling: touch; }
+      .note { font-size: 0.78rem; padding: 12px 14px; }
+    }
+
+    /* Cookie consent – wyśrodkowany na ekranie (telefony i tablety) */
+    .cookie-overlay {
+      position: fixed;
+      top: 0; right: 0; bottom: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      height: 100vh;
+      height: 100dvh;
+      background: rgba(0, 0, 0, 0.6);
+      display: grid;
+      place-items: center;
+      padding: 16px;
+      z-index: 2147483000;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      -webkit-transform: translateZ(0);
+      transform: translateZ(0);
+    }
+    .cookie-overlay[hidden] { display: none; }
+    html.cookie-open, body.cookie-open { overflow: hidden; }
+    .cookie-box {
+      position: relative;
+      margin: auto;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      max-width: 460px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      text-align: center;
+    }
+    .cookie-box h2 { font-size: 1.1rem; margin-bottom: 10px; }
+    .cookie-box p { color: var(--muted); font-size: 0.88rem; margin-bottom: 18px; }
+    .cookie-box a { color: var(--accent); }
+    .cookie-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+    .cookie-actions button {
+      font: inherit; font-size: 0.9rem; font-weight: 600; cursor: pointer;
+      padding: 10px 18px; border-radius: 999px; border: 1px solid var(--border);
+      background: transparent; color: var(--text); min-width: 120px;
+    }
+    .cookie-actions button.accept { background: #1e3a5f; border-color: #1e3a5f; color: var(--accent); }
+    .cookie-actions button:hover { opacity: 0.85; }
+
+    @media (max-width: 640px) {
+      .cookie-box { padding: 20px 18px; }
+      .cookie-actions button { flex: 1 1 0; min-width: 0; }
+    }
+
+    .site-footer { margin-top: 36px; padding-top: 18px; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.78rem; text-align: center; }
+    .site-footer a { color: var(--muted); text-decoration: none; margin: 0 6px; }
+    .site-footer a:hover { color: var(--accent); text-decoration: underline; }
+    .vix-widget { display: inline-flex; flex-wrap: wrap; align-items: baseline; justify-content: center; gap: 8px; margin: 12px auto 0; padding: 8px 16px; border: 1px solid var(--border); border-radius: 999px; background: var(--inner); font-size: 0.86rem; }
+    .vix-widget .vix-label { color: var(--muted); font-weight: 600; letter-spacing: 0.04em; }
+    .vix-widget .vix-value { font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text); }
+    .vix-widget .vix-change { font-variant-numeric: tabular-nums; }
+    .vix-widget .vix-change.up { color: #22c55e; }   /* VIX up = green */
+    .vix-widget .vix-change.down { color: #ef4444; } /* VIX down = red */
+    .vix-widget .vix-time { color: var(--muted); font-size: 0.74rem; }
+    .vix-regime { font-weight: 700; letter-spacing: 0.03em; }
+    .vix-regime.on { color: #4ade80; }
+    .vix-regime.neutral { color: #2f9e66; }
+    .vix-regime.off { color: #f38b8b; }
+    .vix-regime.strong { color: #e25555; }
+    .vix-regime.extreme { color: #c93a3a; }
+    .vix-desc { text-align: center; color: var(--muted); font-size: 0.82rem; margin-top: 6px; }
+    .faq-examples { margin: 8px 0 0 20px; color: var(--muted); font-size: 0.9rem; line-height: 1.6; }
+    .faq-examples li { margin-bottom: 8px; }
+
+    /* ===== Banks section (copied from Currency Pair Sentiment) ===== */
+    :root { --up: #22c55e; --down: #ef4444; --flat: #8b9bb8; }
+    [hidden] { display: none !important; }
+    .cta-row { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center; margin-top: 14px; }
+    .cta-row .pair-cta { margin: 0; }
+    #banksSection { margin-top: 18px; scroll-margin-top: 12px; }
+    #banksSection .card { margin-bottom: 18px; }
+    #banksSection .card h2.center { text-align: center; font-size: 1.1rem; margin-bottom: 12px; }
+    #banksWrap { overflow-x: auto; border-radius: 12px; background: var(--inner); }
+    #banksTable { width: 100%; border-collapse: collapse; font-size: 0.86rem; font-variant-numeric: tabular-nums; }
+    #banksTable th, #banksTable td { padding: 8px 10px; text-align: center; white-space: nowrap; border-bottom: 1px solid #172033; }
+    #banksTable th { position: sticky; top: 0; z-index: 5; box-shadow: 0 1px 0 #172033; color: var(--muted); font-weight: 500; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; background: #0f182a; }
+    #banksTable th:first-child, #banksTable td:first-child { text-align: left; }
+    #banksTable th.sortable { cursor: pointer; user-select: none; }
+    #banksTable th.sortable:hover { color: var(--text); }
+    #banksTable th.sortable::after { content: "↑↓"; display: inline-block; width: 2.4em; text-align: center; letter-spacing: 0.12em; font-size: 1.5em; line-height: 1; vertical-align: -0.12em; margin-left: 2px; color: var(--accent); opacity: 0.85; font-weight: 700; }
+    #banksTable th.sortable.desc::after { content: "▼"; letter-spacing: 0; opacity: 1; }
+    #banksTable th.sortable.asc::after { content: "▲"; letter-spacing: 0; opacity: 1; }
+    #banksTable td.bank { font-weight: 600; color: var(--accent); }
+    #banksTable td.bank .cflag { width: 24px; height: 18px; vertical-align: -3px; margin-right: 8px; }
+    #banksTable td.na { color: var(--muted); font-style: italic; }
+    #banksTable th:nth-child(4), #banksTable th:nth-child(4)::after { padding-left: 10px; padding-right: 10px; margin-right: 0; }
+    @media (min-width: 600px) { #banksWrap { overflow: visible; } }
+    @media (max-width: 599px) { #banksWrap { overflow: auto; } }
+    @media (max-width: 640px) { #banksTable th:nth-child(4) { padding-left: 7px; padding-right: 7px; } }
+    #bankBtns button { min-width: 56px; }
+    .st { font-weight: 600; }
+    .st.hike { color: #22c55e; }
+    .st.hold { color: #eab308; }
+    .st.cut  { color: #ef4444; }
+    .adv.up { color: var(--up); font-weight: 700; }
+    .adv.down { color: var(--down); font-weight: 700; }
+    .adv.flat { color: var(--flat); font-weight: 700; }
+    .mv-time { color: var(--muted); font-size: 0.7rem; margin-top: 2px; }
+    /* Day difference move history (bar chart) */
+    .hist-controls { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center; margin-bottom: 12px; }
+    .cta-row { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center; margin-top: 14px; }
+    .cta-row .pair-cta { margin: 0; }
+    .top-jump { border: 0; cursor: pointer; font-family: inherit; }
+    .pair-cta.top-jump:hover .arrow { transform: translateY(3px); }
+    #dayHistory, #stanceSection { scroll-margin-top: 12px; }
+    .pair-search { display: flex; justify-content: center; margin-bottom: 12px; }
+    .pair-search input, #histPair { background: var(--inner); color: var(--text); border: 1px solid var(--border); border-radius: 999px; padding: 7px 16px; font-size: 0.84rem; font-family: inherit; width: min(100%, 300px); text-align: center; }
+    #histPair { width: 190px; position: relative; padding: 7px 30px; text-align: center; text-align-last: center; }
+    /* Chrome/Safari put the dropdown arrow inside the field and push the text left; taking it out of the flow centers the pair on the whole field */
+    #histPair::-webkit-calendar-picker-indicator { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); margin: 0; padding: 0; opacity: .6; filter: invert(1); cursor: pointer; }
+    .pair-search input::placeholder, #histPair::placeholder { color: var(--muted); }
+    .hist-controls select, .hist-controls button { background: var(--inner); color: var(--text); border: 1px solid var(--border); border-radius: 999px; padding: 6px 14px; font-size: 0.82rem; cursor: pointer; font-family: inherit; }
+    .hist-controls button.active { background: #1e3a5f; color: var(--accent); border-color: #2a4a75; }
+    .hist-stats { display: flex; flex-wrap: wrap; gap: 8px 22px; justify-content: center; font-size: 0.84rem; color: var(--muted); margin-bottom: 8px; min-height: 20px; }
+    .hist-stats strong { font-variant-numeric: tabular-nums; }
+    /* The box has the same proportions as the drawing, so it keeps its height while "Loading…" is shown and does not jump when data arrives */
+    .hist-chart { position: relative; width: 100%; background: var(--inner); border-radius: 12px; padding: 0; aspect-ratio: 340 / 340; }
+    @media (min-width: 600px) and (max-width: 1023px) { .hist-chart { aspect-ratio: 900 / 310; } }
+    @media (min-width: 1024px) { .hist-chart { aspect-ratio: 900 / 260; } }
+    .hist-chart .status-msg { padding: 0; display: flex; align-items: center; justify-content: center; height: 100%; }
+    .hist-chart svg { display: block; width: 100%; height: auto; }
+    .hist-scroll { overflow: hidden; }
+    .hist-chart .bar { transition: opacity .15s; }
+    .hist-chart .bar:hover { opacity: .7; }
+    .hist-cursor { stroke: var(--accent); stroke-width: 1; stroke-dasharray: 4 3; opacity: 0; pointer-events: none; }
+    .hist-tip { position: absolute; top: 0; left: 0; z-index: 2; pointer-events: none; opacity: 0; white-space: nowrap; background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 5px 10px; font-size: 0.78rem; color: var(--text); box-shadow: 0 6px 18px rgba(0,0,0,.4); transform: translate(-50%, 0); transition: opacity .1s; }
+    .hist-tip .tip-date { color: var(--muted); font-size: 0.7rem; display: block; }
+    .hist-tip .tip-val { font-weight: 700; font-variant-numeric: tabular-nums; }
+    .hist-chart text { fill: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+    .hist-range { display: flex; flex-wrap: wrap; gap: 10px 18px; justify-content: center; align-items: center; margin-top: 12px; font-size: 0.82rem; color: var(--muted); }
+    .hist-field { position: relative; display: inline-flex; align-items: center; gap: 6px; }
+    .hist-range input { background: var(--inner); color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 6px 10px; font-size: 0.82rem; font-family: inherit; width: 8.6em; text-align: center; cursor: pointer; }
+    .hist-cal { position: absolute; left: 0; bottom: calc(100% + 6px); z-index: 30; width: 252px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 10px; box-shadow: 0 10px 30px rgba(0,0,0,.5); }
+    .hist-cal .cal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; color: var(--text); font-weight: 600; font-size: 0.85rem; }
+    .hist-cal .cal-nav { background: none; border: 0; color: var(--accent); font-size: 1.1rem; cursor: pointer; padding: 2px 10px; border-radius: 8px; }
+    .hist-cal .cal-nav:disabled { opacity: .2; cursor: default; }
+    .hist-cal .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; }
+    .hist-cal .cal-dow { font-size: 0.68rem; color: var(--muted); padding: 2px 0; }
+    .hist-cal .cal-day { background: none; border: 0; color: var(--text); font-size: 0.8rem; padding: 6px 0; border-radius: 8px; cursor: pointer; font-family: inherit; }
+    .hist-cal .cal-day:hover { background: #1e3a5f; }
+    .hist-cal .cal-day.sel { background: var(--accent); color: #0b1220; font-weight: 700; }
+  </style>
+  <link rel="canonical" href="https://trikoalerts.github.io/interest-rate-probability" />
+  <!-- Google Analytics (Consent Mode v2) -->
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    gtag('consent', 'default', {
+      analytics_storage: 'denied',
+      ad_storage: 'denied',
+      ad_user_data: 'denied',
+      ad_personalization: 'denied'
+    });
+    try {
+      if (localStorage.getItem('cookie_consent') === 'accepted') {
+        gtag('consent', 'update', { analytics_storage: 'granted' });
+      }
+    } catch (e) {}
+  </script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-CV4V4Q5GC5"></script>
+  <script>
+    gtag('js', new Date());
+    gtag('config', 'G-CV4V4Q5GC5');
+  </script>
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": "Interest Rate Probability",
+  "description": "Market-implied hike, hold and cut probabilities for upcoming decisions of 8 major central banks, derived from OIS rates and updated every 30 seconds.",
+  "url": "https://trikoalerts.github.io/interest-rate-probability",
+  "inLanguage": "en",
+  "keywords": ["interest rate probability", "central bank rate probability", "rate hike odds", "rate cut probability", "OIS", "8 central banks", "Fed", "ECB", "Bank of England", "Bank of Japan", "Bank of Canada", "RBA", "SNB", "RBNZ"],
+  "about": [
+    { "@type": "Thing", "name": "Interest rate probability", "description": "Market-implied probabilities of a cut, hold or hike in the policy rates of 8 central banks: Federal Reserve (USD), European Central Bank (EUR), Bank of England (GBP), Bank of Japan (JPY), Bank of Canada (CAD), Reserve Bank of Australia (AUD), Swiss National Bank (CHF) and Reserve Bank of New Zealand (NZD), derived from OIS rates." },
+    { "@type": "Thing", "name": "Interest rate", "sameAs": "https://en.wikipedia.org/wiki/Interest_rate" },
+    { "@type": "Thing", "name": "Central bank", "sameAs": "https://en.wikipedia.org/wiki/Central_bank" },
+    { "@type": "Thing", "name": "Monetary policy", "sameAs": "https://en.wikipedia.org/wiki/Monetary_policy" },
+    { "@type": "Thing", "name": "Overnight index swap", "sameAs": "https://en.wikipedia.org/wiki/Overnight_indexed_swap" },
+    { "@type": "Thing", "name": "Federal Reserve", "sameAs": "https://en.wikipedia.org/wiki/Federal_Reserve" },
+    { "@type": "Thing", "name": "European Central Bank", "sameAs": "https://en.wikipedia.org/wiki/European_Central_Bank" },
+    { "@type": "Thing", "name": "Bank of England", "sameAs": "https://en.wikipedia.org/wiki/Bank_of_England" },
+    { "@type": "Thing", "name": "Bank of Japan", "sameAs": "https://en.wikipedia.org/wiki/Bank_of_Japan" },
+    { "@type": "Thing", "name": "Bank of Canada", "sameAs": "https://en.wikipedia.org/wiki/Bank_of_Canada" },
+    { "@type": "Thing", "name": "Reserve Bank of Australia", "sameAs": "https://en.wikipedia.org/wiki/Reserve_Bank_of_Australia" },
+    { "@type": "Thing", "name": "Swiss National Bank", "sameAs": "https://en.wikipedia.org/wiki/Swiss_National_Bank" },
+    { "@type": "Thing", "name": "Reserve Bank of New Zealand", "sameAs": "https://en.wikipedia.org/wiki/Reserve_Bank_of_New_Zealand" }
+  ],
+  "mentions": [
+    { "@type": "Thing", "name": "Federal funds rate", "sameAs": "https://en.wikipedia.org/wiki/Federal_funds_rate" },
+    { "@type": "Thing", "name": "Deposit facility rate", "sameAs": "https://en.wikipedia.org/wiki/Deposit_facility" },
+    { "@type": "Thing", "name": "Bank Rate", "sameAs": "https://en.wikipedia.org/wiki/Bank_rate" }
+  ]
+}
+  </script>
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What are central bank rate probabilities?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "They are market-implied estimates of how likely a central bank is to cut, hold or hike its policy rate at each upcoming meeting. They are derived from the OIS (Overnight Index Swap) market and updated automatically."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What do cut, hold and hike mean?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Cut means the policy rate is lowered, hold means it stays at the same level, and hike means it is raised. The percentages in the table show the probability of each outcome after the given meeting, measured from today's rate."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What are basis points (bp)?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A basis point is one hundredth of a percentage point. A change of 25 bp equals 0.25 percentage points."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How often is the data updated?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The page refreshes its data every 30 seconds while it is open in a browser. The valuation time and the last update time are shown at the top of the page."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Which central banks are covered?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The Federal Reserve (USD), European Central Bank (EUR), Bank of England (GBP), Bank of Japan (JPY), Bank of Canada (CAD), Reserve Bank of Australia (AUD), Swiss National Bank (CHF) and Reserve Bank of New Zealand (NZD)."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the VIX?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The VIX, or Cboe Volatility Index, measures the market's expected volatility of the S&P 500 over the next 30 days. It is calculated from S&P 500 option prices and is often called the market's fear gauge because it tends to rise during periods of uncertainty."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What do the VIX levels mean?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Below 15 suggests a calm market and a risk-on mood. Readings from 15 to 20 indicate normal or moderate uncertainty. Between 20 and 30 signals heightened uncertainty and risk-off sentiment. From 30 to 40 points to strong market stress, and above 40 indicates extreme volatility and fear."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Which currency has the advantage in risk-off conditions?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The upcoming meetings of central banks should be compared. During risk-off periods, safe-haven currencies such as the Swiss franc (CHF), Japanese yen (JPY) and US dollar (USD) have theoretically tended to strengthen. However, basis-point (bp) values do not always indicate which currency actually has the advantage in risk-off conditions, so this should be taken into account when analyzing the data.\n\nExamples:\n1. If NZD shows +20 bp and CHF shows +4 bp, the rule suggests that CHF should strengthen in risk-off conditions. However, it is better to choose other market conditions listed below.\n2. If NZD shows +10 bp and CHF shows +20 bp, these are ideal risk-off conditions for CHF to strengthen, as the expected move should be stronger and larger.\n3. If NZD has a 70% probability of a rate hike and +20 bp, and CHF also has a 70% probability of a rate hike and +20 bp, the conditions for CHF to strengthen are more favorable than in the first example."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How often is the VIX updated?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The VIX value on this page refreshes automatically about once a minute while the page is open. VIX data is delayed by approximately 15 minutes and should not be used as real-time trading data."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why is the VIX change shown in red or green?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The percentage next to the VIX value shows how much the index has moved since the previous close. A rise is shown in red because a higher VIX usually signals more uncertainty and greater risk aversion, while a fall is shown in green because it usually points to calmer conditions. The colour reflects the direction of the VIX itself, not whether a particular currency or asset is going up or down."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Which currency has the advantage in risk-on or neutral conditions?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "In risk-on and neutral conditions, basis-point (bp) values decide which currency has the advantage. The upcoming meetings of central banks should be compared. In risk-on conditions, it is best to choose currency pairs where the base currency is significantly stronger than the quote currency, e.g. NZD (+20) / CHF (+5). This allows us to take advantage of the relative strength of one currency over the other."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What factors influence rate probabilities and basis-point values?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Rate probabilities and basis-point values move as new information about the economy and central bank policy arrives. The main drivers include:\n1. Central Banks – central bank decisions, interest rates and speeches.\n2. Economic Releases – macroeconomic data compared with forecasts.\n3. Institutions – reports and forecasts from major banks.\n4. Headlines – economic and market news.\n5. Geopolitical Risks – wars, elections, conflicts and tariffs.\n\nBecause these factors change often, the bp values shown here can move quickly before a meeting."
+      }
+    }
+  ]
+}
+  </script>
+  <link rel="icon" href="https://trikoalerts.github.io/favicon.ico" sizes="any" />
+  <link rel="apple-touch-icon" sizes="180x180" href="https://trikoalerts.github.io/apple-touch-icon.png" />
+  <meta name="theme-color" content="#0b1220" />
+</head>
+<body>
+  <div id="cookieBanner" class="cookie-overlay" role="dialog" aria-modal="true" aria-labelledby="cookieTitle" hidden>
+    <div class="cookie-box">
+      <h2 id="cookieTitle">Cookies</h2>
+      <p>We use cookies to measure traffic and improve this site. You can accept or decline analytics cookies. More information is available in our <a href="/privacy">privacy policy</a>.</p>
+      <div class="cookie-actions">
+        <button type="button" id="cookieDecline">Decline</button>
+        <button type="button" id="cookieAccept" class="accept">Accept</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <header>
+      <h1>Interest Rate Probability</h1>
+      <p>Interest rate probabilities are calculated based on the OIS (Overnight Index Swap) market. Data is automatically updated every 30 seconds.</p>
+      <div class="vix-widget" id="vixWidget" aria-live="polite">
+        <span class="vix-label">VIX</span>
+        <span class="vix-value" id="vixValue">…</span>
+        <span class="vix-change" id="vixChange"></span>
+        <span class="vix-regime" id="vixRegime"></span>
+    <span class="vix-time" id="vixTime"></span>
+      </div>
+      <p class="vix-desc" id="vixDesc"></p>
+      <div class="meta">
+        <span id="statusBadge" class="badge">loading…</span>
+        <span id="valuationBadge" class="badge" style="display:none"></span>
+        <span id="lastUpdateBadge" class="badge" style="display:none"></span>
+      </div>
+    </header>
+
+    <nav id="tabs" class="tabs"></nav>
+
+    <main id="grid" class="grid">
+      <div class="status-msg">Loading data from API…</div>
+    </main>
+    <noscript>
+      <section class="note">
+        <h2>Interest Rate Probability – central bank rate probabilities summary</h2>
+        <p>This page shows market-implied probabilities of a cut (lower), hold (unchanged) or hike (higher) in the policy rate at each upcoming meeting of eight central banks, along with the expected change in basis points and the expected rate level.</p>
+        <ul>
+          <li>Federal Reserve (USD, Fed Funds)</li>
+          <li>European Central Bank (EUR, Deposit Facility)</li>
+          <li>Bank of England (GBP, Bank Rate)</li>
+          <li>Bank of Japan (JPY), Bank of Canada (CAD), Reserve Bank of Australia (AUD), Swiss National Bank (CHF), Reserve Bank of New Zealand (NZD)</li>
+        </ul>
+        <p>Enable JavaScript to see the current interest rate probabilities, which are refreshed every 30 seconds.</p>
+      </section>
+    </noscript>
+
+    <div id="banksSection">
+      <section class="card">
+        <h2 class="center">Central Banks (%)</h2>
+        <div class="table-wrap" id="banksWrap">
+          <table id="banksTable">
+            <thead>
+              <tr>
+                <th>Bank</th><th>Currency</th>
+                <th class="sortable" data-bsort="bp">Next meeting (Cut / Hold / Hike)</th>
+                <th class="sortable" data-bsort="move">Move today (%)</th>
+                <th>Stance</th>
+              </tr>
+            </thead>
+            <tbody id="banksBody"><tr><td colspan="5" class="na">Loading…</td></tr></tbody>
+          </table>
+        </div>
+        <p class="note"><strong>Next meeting (Cut / Hold / Hike)</strong> = probability of a cut, hold or hike at the next priced central bank meeting, the same numbers as on Interest Rate Probability. <strong>Move today</strong> = how much that expectation has risen (▲) or fallen (▼) since 00:00 Warsaw time today, in percent. <strong>Stance</strong> = the latest HIKE / HOLD / CUT stance with the date and time of its last change. Data refreshes every 30 s.</p>
+      </section>
+
+      <section class="card" id="bankHistory">
+        <h2 class="center">Bank Day Move History</h2>
+        <div class="hist-controls" id="bankBtns"></div>
+        <div class="hist-stats" id="bankStats"></div>
+        <div class="hist-chart" id="bankChart"><div class="status-msg">Loading…</div></div>
+        <div class="hist-range">
+          <div class="hist-field"><span>From</span><input type="text" id="bankFrom" placeholder="DD.MM.YYYY" maxlength="10" inputmode="numeric" autocomplete="off" /></div>
+          <div class="hist-field"><span>To</span><input type="text" id="bankTo" placeholder="DD.MM.YYYY" maxlength="10" inputmode="numeric" autocomplete="off" /></div>
+        </div>
+        <p class="note" id="bankNote"></p>
+      </section>
+    </div>
+
+    <div class="note">
+      <strong>How to read the table:</strong>
+      <ul>
+        <li><strong>Cut / Hold / Hike</strong> – the probability that the policy rate after the given meeting will be lower / unchanged / higher than today (cumulative, measured from today's level).</li>
+        <li><strong>Change (bp)</strong> – expected change in the rate at this single meeting. 25 bp = 0.25 percentage points.</li>
+        <li><strong>Cumulative (bp)</strong> – sum of expected changes from today up to and including this meeting.</li>
+        <li><span class="prov">*</span> – provisional date, the central bank may still change it.</li>
+      </ul>
+    </div>
+
+    <section class="note" id="faq">
+      <strong>Frequently asked questions</strong>
+        <details>
+          <summary>What are central bank rate probabilities?</summary>
+          <p>They are market-implied estimates of how likely a central bank is to cut, hold or hike its policy rate at each upcoming meeting. They are derived from the OIS (Overnight Index Swap) market and updated automatically.</p>
+        </details>
+        <details>
+          <summary>What do cut, hold and hike mean?</summary>
+          <p>Cut means the policy rate is lowered, hold means it stays at the same level, and hike means it is raised. The percentages in the table show the probability of each outcome after the given meeting, measured from today's rate.</p>
+        </details>
+        <details>
+          <summary>What are basis points (bp)?</summary>
+          <p>A basis point is one hundredth of a percentage point. A change of 25 bp equals 0.25 percentage points.</p>
+        </details>
+        <details>
+          <summary>How often is the data updated?</summary>
+          <p>The page refreshes its data every 30 seconds while it is open in a browser. The valuation time and the last update time are shown at the top of the page.</p>
+        </details>
+        <details>
+          <summary>Which central banks are covered?</summary>
+          <p>The Federal Reserve (USD), European Central Bank (EUR), Bank of England (GBP), Bank of Japan (JPY), Bank of Canada (CAD), Reserve Bank of Australia (AUD), Swiss National Bank (CHF) and Reserve Bank of New Zealand (NZD).</p>
+        </details>
+
+        <details>
+          <summary>What is the VIX?</summary>
+          <p>The VIX, or Cboe Volatility Index, measures the market's expected volatility of the S&amp;P 500 over the next 30 days. It is calculated from S&amp;P 500 option prices and is often called the market's "fear gauge" because it tends to rise during periods of uncertainty.</p>
+        </details>
+        <details>
+          <summary>What do the VIX levels mean?</summary>
+          <p>Below 15 suggests a calm market and a risk-on mood. Readings from 15 to 20 indicate normal or moderate uncertainty. Between 20 and 30 signals heightened uncertainty and risk-off sentiment. From 30 to 40 points to strong market stress, and above 40 indicates extreme volatility and fear.</p>
+        </details>
+        <details>
+          <summary>Which currency has the advantage in risk-off conditions?</summary>
+          <p>The upcoming meetings of central banks should be compared. During risk-off periods, safe-haven currencies such as the Swiss franc (CHF), Japanese yen (JPY) and US dollar (USD) have theoretically tended to strengthen. However, basis-point (bp) values do not always indicate which currency actually has the advantage in risk-off conditions, so this should be taken into account when analyzing the data.</p>
+          <p><strong>Examples:</strong></p>
+          <ol class="faq-examples">
+            <li>If NZD shows +20 bp and CHF shows +4 bp, the rule suggests that CHF should strengthen in risk-off conditions. However, it is better to choose other market conditions listed below.</li>
+            <li>If NZD shows +10 bp and CHF shows +20 bp, these are ideal risk-off conditions for CHF to strengthen, as the expected move should be stronger and larger.</li>
+            <li>If NZD has a 70% probability of a rate hike and +20 bp, and CHF also has a 70% probability of a rate hike and +20 bp, the conditions for CHF to strengthen are more favorable than in the first example.</li>
+          </ol>
+        </details>
+        <details>
+          <summary>Which currency has the advantage in risk-on or neutral conditions?</summary>
+          <p>In risk-on and neutral conditions, basis-point (bp) values decide which currency has the advantage. The upcoming meetings of central banks should be compared. In risk-on conditions, it is best to choose currency pairs where the base currency is significantly stronger than the quote currency, e.g. NZD (+20) / CHF (+5). This allows us to take advantage of the relative strength of one currency over the other.</p>
+        </details>
+        <details>
+          <summary>How often is the VIX updated?</summary>
+          <p>The VIX value on this page refreshes automatically about once a minute while the page is open. VIX data is delayed by approximately 15 minutes and should not be used as real-time trading data.</p>
+        </details>
+        <details>
+          <summary>Why is the VIX change shown in red or green?</summary>
+          <p>The percentage next to the VIX value shows how much the index has moved since the previous close. A rise is shown in red because a higher VIX usually signals more uncertainty and greater risk aversion, while a fall is shown in green because it usually points to calmer conditions. The colour reflects the direction of the VIX itself, not whether a particular currency or asset is going up or down.</p>
+        </details>
+        <details>
+          <summary>What factors influence rate probabilities and basis-point values?</summary>
+          <p>Rate probabilities and basis-point values move as new information about the economy and central bank policy arrives. The main drivers include:</p>
+          <ol class="faq-examples">
+            <li><strong>Central Banks</strong> – central bank decisions, interest rates and speeches.</li>
+            <li><strong>Economic Releases</strong> – macroeconomic data compared with forecasts.</li>
+            <li><strong>Institutions</strong> – reports and forecasts from major banks.</li>
+            <li><strong>Headlines</strong> – economic and market news.</li>
+            <li><strong>Geopolitical Risks</strong> – wars, elections, conflicts and tariffs.</li>
+          </ol>
+          <p>Because these factors change often, the bp values shown here can move quickly before a meeting.</p>
+        </details>
+    </section>
+
+    <footer class="site-footer">
+      <span>Triko Alerts</span> ·
+      <a href="/privacy">Privacy Policy</a> ·
+      <a href="#" onclick="try{localStorage.removeItem('cookie_consent')}catch(e){};location.reload();return false;">Cookie settings</a>
+    </footer>
+  </div>
+
+  <script>
+    // Cookie consent
+    (function () {
+      const banner = document.getElementById("cookieBanner");
+      const KEY = "cookie_consent";
+      let saved = null;
+      try { saved = localStorage.getItem(KEY); } catch (e) {}
+      function lock(on) { document.documentElement.classList.toggle("cookie-open", on); document.body.classList.toggle("cookie-open", on); }
+      if (!saved) { banner.hidden = false; lock(true); }
+
+      function save(value) {
+        try { localStorage.setItem(KEY, value); } catch (e) {}
+        if (typeof gtag === "function") {
+          gtag("consent", "update", { analytics_storage: value === "accepted" ? "granted" : "denied" });
+        }
+        banner.hidden = true;
+        lock(false);
+      }
+      document.getElementById("cookieAccept").addEventListener("click", () => save("accepted"));
+      document.getElementById("cookieDecline").addEventListener("click", () => save("declined"));
+    })();
+
+    // URL of your Cloudflare Worker (the API key is stored only there, not on this page).
+    // Enter the bare address, without /matrix at the end.
+    const API_URL = "https://server.serverserver.workers.dev";
+    const POLL_MS = 30_000;
+    // Longest horizon available, so that all published meetings are shown.
+    const MAX_HORIZON = 36;
+
+    const BANK_META = {
+      USD: { short: "FED", name: "Federal Reserve", ccy: "USD · Fed Funds", flag: "us" },
+      EUR: { short: "ECB", name: "European Central Bank", ccy: "EUR · Deposit Facility", flag: "eu" },
+      GBP: { short: "BOE", name: "Bank of England", ccy: "GBP · Bank Rate", flag: "gb" },
+      JPY: { short: "BOJ", name: "Bank of Japan", ccy: "JPY · Policy Rate", flag: "jp" },
+      CAD: { short: "BOC", name: "Bank of Canada", ccy: "CAD · Overnight Rate", flag: "ca" },
+      AUD: { short: "RBA", name: "Reserve Bank of Australia", ccy: "AUD · Cash Rate", flag: "au" },
+      CHF: { short: "SNB", name: "Swiss National Bank", ccy: "CHF · Policy Rate", flag: "ch" },
+      NZD: { short: "RBNZ", name: "Reserve Bank of New Zealand", ccy: "NZD · Official Cash Rate", flag: "nz" },
+    };
+    const ORDER = ["USD", "EUR", "GBP", "JPY", "CAD", "AUD", "CHF", "NZD"];
+    const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+    let pollTimer = null;
+    let inFlight = false;
+    let hasLoaded = false;
+
+    // Flagi jako obrazki z flagcdn.com – emoji flag nie wyświetlają się na większości komputerów z Windows.
+    const flagHtml = (code, cls = "flag-img") =>
+      /^[a-z]{2}$/.test(code)
+        ? `<img class="${cls}" src="https://flagcdn.com/w80/${code}.png" srcset="https://flagcdn.com/w160/${code}.png 2x" width="40" height="30" alt="" loading="lazy" />`
+        : `<span class="${cls}">${code}</span>`;
+
+    const isNum = (v) => typeof v === "number" && isFinite(v);
+    const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+    function fmtPct(n) { return isNum(n) ? n.toFixed(1) + "%" : "—"; }
+    function fmtRate(n, digits = 2) { return isNum(n) ? Number(n).toFixed(digits) + "%" : "—"; }
+    function fmtBp(n) {
+      if (!isNum(n)) return `<span class="bp flat">—</span>`;
+      const r = Math.round(n * 10) / 10;
+      const cls = r > 0 ? "up" : r < 0 ? "down" : "flat";
+      const sign = r > 0 ? "+" : r < 0 ? "−" : "";
+      return `<span class="bp ${cls}">${sign}${Math.abs(r).toFixed(1)} bp</span>`;
+    }
+    function fmtDate(iso) {
+      if (!iso) return "—";
+      const [y, m, d] = iso.split("-");
+      return `${parseInt(d, 10)} ${MONTHS[parseInt(m, 10) - 1]} ${y}`;
+    }
+    function fmtDateShort(iso) {
+      if (!iso) return "—";
+      const [y, m, d] = iso.split("-");
+      return `${parseInt(d, 10)} ${MONTHS[parseInt(m, 10) - 1]} '${y.slice(2)}`;
+    }
+    function fmtValuation(iso) {
+      if (!iso) return "";
+      try {
+        return new Date(iso.endsWith("Z") ? iso : iso + "Z").toLocaleString("en-GB", {
+          year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", timeZoneName: "short",
+        });
+      } catch { return iso; }
+    }
+    // Markets pause from Saturday 00:00 to Monday 00:00 (Warsaw time).
+    function isMarketClosed(d = new Date()) {
+      const wd = new Intl.DateTimeFormat("en-US", { timeZone: "Europe/Warsaw", weekday: "short" }).format(d);
+      return wd === "Sat" || wd === "Sun";
+    }
+    // Next Monday 00:00 in Warsaw time, as an instant (shown later in the viewer's own time zone).
+    function nextMarketOpen(from = new Date()) {
+      const fmt = new Intl.DateTimeFormat("en-US", { timeZone: "Europe/Warsaw", weekday: "short", hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
+      const d = new Date(from);
+      d.setSeconds(0, 0);
+      for (let i = 0; i < 60 * 24 * 4; i++) {
+        d.setMinutes(d.getMinutes() + 1);
+        const parts = Object.fromEntries(fmt.formatToParts(d).map((p) => [p.type, p.value]));
+        if (parts.weekday === "Mon" && parts.hour === "00" && parts.minute === "00") return new Date(d);
+      }
+      return null;
+    }
+    function fmtResume(d) {
+      if (!d) return "Mon 00:00";
+      return d.toLocaleString("en-GB", { weekday: "short", hour: "2-digit", minute: "2-digit", timeZoneName: "short" });
+    }
+    function nowTime() {
+      return new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    }
+    // Only meetings with a valuation.
+    const isPriced = (mt) => isNum(mt.hold_probability) || isNum(mt.implied_change_bp);
+
+    function renderMeetingsTable(m) {
+      let cumulative = 0;
+      const rows = (m.meetings || []).filter(isPriced).map((mt, i) => {
+        const prov = mt.provisional ? `<span class="prov" title="Provisional date">*</span>` : "";
+        const days = isNum(mt.days_until) ? mt.days_until : "—";
+        const head = `<td>${i + 1}</td><td class="date"><strong>${fmtDate(mt.meeting_date)}</strong>${prov}</td><td>${days}</td>`;
+        if (!isPriced(mt)) {
+          return `<tr>${head}<td class="na" colspan="7">not priced – no further announced date</td></tr>`;
+        }
+        cumulative += isNum(mt.implied_change_bp) ? mt.implied_change_bp : 0;
+        const c = mt.cut_probability || 0, h = mt.hold_probability || 0, k = mt.hike_probability || 0;
+        return `<tr>
+          ${head}
+          <td class="cut">${fmtPct(c)}</td>
+          <td class="hold">${fmtPct(h)}</td>
+          <td class="hike">${fmtPct(k)}</td>
+          <td>${fmtBp(mt.implied_change_bp)}</td>
+          <td>${fmtBp(cumulative)}</td>
+          <td>${fmtRate(mt.expected_rate, 3)}</td>
+          <td>${mt.base_case ? `<span class="base ${esc(mt.base_case)}">${esc(mt.base_case)}</span>` : "—"}</td>
+        </tr>`;
+      }).join("");
+
+      return `<div class="table-wrap"><table>
+        <thead><tr>
+          <th>#</th><th>Meeting</th><th>Days</th>
+          <th>Cut</th><th>Hold</th><th>Hike</th>
+          <th>Change (bp)</th><th>Cumulative (bp)</th><th>Expected rate</th><th>Base case</th>
+        </tr></thead>
+        <tbody>${rows || `<tr><td colspan="10" class="na">No priced meetings</td></tr>`}</tbody>
+      </table></div>`;
+    }
+
+    function renderCard(m) {
+      const meta = BANK_META[m.currency] || { name: m.currency, ccy: m.currency, flag: "🏛" };
+      let rate = fmtRate(m.current_policy_rate, isNum(m.current_policy_rate) && m.target_range ? 3 : 2);
+      if (m.target_range) rate += ` <span class="muted">(${fmtRate(m.target_range.low)}–${fmtRate(m.target_range.high)})</span>`;
+      // Only meetings with a valuation are counted.
+      const meetings = (m.meetings || []).filter(isPriced);
+      const next = meetings[0];
+      const last = meetings[meetings.length - 1];
+      const totalBp = meetings.reduce((s, mt) => s + (isNum(mt.implied_change_bp) ? mt.implied_change_bp : 0), 0);
+      const pending = isNum(m.pending_rate)
+        ? `<div class="pending">New announced rate ${fmtRate(m.pending_rate)} takes effect from ${fmtDate(m.pending_rate_effective_date)} – probabilities are calculated from it.</div>`
+        : "";
+
+      return `<article class="card" id="bank-${esc(m.currency)}">
+        <div class="card-header">
+          <div class="bank-info"><h2>${meta.name}</h2><div class="ccy">${meta.ccy}</div></div>
+          <span class="flag">${flagHtml(meta.flag)}</span>
+        </div>
+        <div class="facts">
+          <div><span class="label">Current rate: </span><span class="value">${rate}</span></div>
+          <div><span class="label">Meetings: </span><span class="value">${meetings.length}</span></div>
+          <div><span class="label">Next: </span><span class="value">${next ? fmtDate(next.meeting_date) : "—"}</span></div>
+          <div><span class="label">Cumulative to ${last ? fmtDateShort(last.meeting_date) : "—"}: </span><span class="value">${fmtBp(totalBp)}</span></div>
+          ${isNum(m.step_bp) ? `<div><span class="label">Step: </span><span class="value">${m.step_bp} bp</span></div>` : ""}
+          ${m.observation_basis === "eod" ? `<div><span class="label">Data: </span><span class="value">end of day</span></div>` : ""}
+        </div>
+        ${pending}
+        ${renderMeetingsTable(m)}
+      </article>`;
+    }
+
+    async function loadData(isBackground = false) {
+      if (inFlight) return;
+      inFlight = true;
+      const badge = document.getElementById("statusBadge");
+      const valBadge = document.getElementById("valuationBadge");
+      const lastBadge = document.getElementById("lastUpdateBadge");
+      const grid = document.getElementById("grid");
+      const tabs = document.getElementById("tabs");
+
+      if (hasLoaded && isMarketClosed()) {
+        inFlight = false;
+        badge.className = "badge closed";
+        badge.textContent = "⏸ market closed · resumes " + fmtResume(nextMarketOpen());
+        return;
+      }
+
+      if (!isBackground) {
+        badge.className = "badge";
+        badge.textContent = "loading…";
+      }
+
+      try {
+        const res = await fetch(`${API_URL.replace(/\/+$/, "")}/matrix?horizon_months=${MAX_HORIZON}`);
+        if (!res.ok) {
+          const errText = await res.text();
+          throw new Error(`HTTP ${res.status}: ${errText || res.statusText}`);
+        }
+        const data = await res.json();
+        const raw = Array.isArray(data.matrices) ? data.matrices : Array.isArray(data) ? data : [data];
+        const list = raw;
+        list.sort((a, b) => {
+          const ia = ORDER.indexOf(a.currency), ib = ORDER.indexOf(b.currency);
+          return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib);
+        });
+
+        tabs.innerHTML = list.map((m) => {
+          const meta = BANK_META[m.currency] || { flag: "🏛" };
+          return `<a href="#bank-${esc(m.currency)}">${flagHtml(meta.flag, "tab-flag")} ${esc(meta.short || m.currency)} · ${(m.meetings || []).filter(isPriced).length}</a>`;
+        }).join("");
+        grid.innerHTML = list.map(renderCard).join("");
+        if (window.bkOnMatrix) window.bkOnMatrix(list);
+
+        hasLoaded = true;
+        badge.className = "badge live";
+        badge.textContent = "● LIVE (every 30s)";
+        valBadge.style.display = "inline-block";
+        valBadge.textContent = "valuation: " + fmtValuation(data.valuation_time || list[0]?.valuation_time);
+        lastBadge.style.display = "inline-block";
+        lastBadge.textContent = "updated: " + nowTime();
+      } catch (err) {
+        console.error(err);
+        badge.className = "badge error";
+        badge.textContent = "API error";
+        if (!grid.querySelector(".card")) {
+          grid.innerHTML = `<div class="status-msg">Failed to load data.<br><small>${esc(err.message)}</small></div>`;
+        }
+      } finally {
+        inFlight = false;
+      }
+    }
+
+    function startPolling() {
+      loadData(false);
+      if (pollTimer) clearInterval(pollTimer);
+      pollTimer = setInterval(() => loadData(true), POLL_MS);
+    }
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) { if (pollTimer) clearInterval(pollTimer); pollTimer = null; }
+      else startPolling();
+    });
+    startPolling();
+  </script>
+  <script>
+  (function () {
+    // ===== Banks section (copied from Currency Pair Sentiment) =====
+    // Same Worker as Currency Pair Sentiment: pairs, stance and bank history.
+    const PAIRS_URL = "https://pairs-moves.serverserver.workers.dev";
+    const HISTORY_URL = PAIRS_URL;
+    const BK_POLL_MS = 30000;
+    const BANK_HISTORY_START = "2026-11-27";
+    const BK_MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    let lastPairRows = [], stanceRows = [], bankSortKey = null, bankSortDir = "desc", bankCur = ORDER[0], bankHist = [], bankHistLoaded = false;
+    let matrixNext = {}, bankMode = "yr", bankTimer = null;
+
+    const pad2 = (n) => String(n).padStart(2, "0");
+    const warsawDay = (d) => new Date(d).toLocaleDateString("sv-SE", { timeZone: "Europe/Warsaw" });
+    const fmtDay = (iso) => iso ? `${iso.slice(8)}.${iso.slice(5, 7)}.${iso.slice(0, 4)}` : "";
+    const setDay = (el, iso) => { el.dataset.iso = iso; el.value = fmtDay(iso); };
+    const FLAGS = { USD: "us", EUR: "eu", GBP: "gb", JPY: "jp", CAD: "ca", AUD: "au", CHF: "ch", NZD: "nz" };
+    const ORDER = ["EUR", "GBP", "AUD", "NZD", "USD", "CAD", "CHF", "JPY"];
+    const isNum = (v) => typeof v === "number" && isFinite(v);
+    const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+    const BANK_NAMES = { EUR: "European Central Bank (ECB)", GBP: "Bank of England (BoE)", AUD: "Reserve Bank of Australia (RBA)", NZD: "Reserve Bank of New Zealand (RBNZ)", USD: "Federal Reserve (Fed)", CAD: "Bank of Canada (BoC)", CHF: "Swiss National Bank (SNB)", JPY: "Bank of Japan (BoJ)" };
+
+    function fmtBp(n) {
+          if (!isNum(n)) return `<span class="bp flat">—</span>`;
+          const r = Math.round(n * 10) / 10;
+          const cls = r > 0 ? "up" : r < 0 ? "down" : "flat";
+          const sign = r > 0 ? "+" : r < 0 ? "−" : "";
+          return `<span class="bp ${cls}">${sign}${Math.abs(r).toFixed(1)} bp</span>`;
+        }
+
+    function fmtPct(n) {
+          if (!isNum(n)) return `<span class="bp flat">—</span>`;
+          const r = Math.round(n) / 100;
+          const cls = r > 0 ? "up" : r < 0 ? "down" : "flat";
+          const sign = r > 0 ? "+" : r < 0 ? "−" : "";
+          return `<span class="bp ${cls}">${sign}${Math.abs(r).toFixed(2)}%</span>`;
+        }
+
+    function nextBp(m) {
+          const priced = (m.meetings || []).filter((mt) => isNum(mt.hold_probability) || isNum(mt.implied_change_bp));
+          const first = priced[0];
+          return first && isNum(first.implied_change_bp) ? first.implied_change_bp : null;
+        }
+
+    function parseDay(t) {
+          t = String(t).trim();
+          let y, mo, d, m = t.match(/^(\d{1,2})[.\-\/ ](\d{1,2})[.\-\/ ](\d{4})$/);
+          if (m) { d = +m[1]; mo = +m[2]; y = +m[3]; }
+          else if ((m = t.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/))) { y = +m[1]; mo = +m[2]; d = +m[3]; }
+          else return null;
+          const dt = new Date(Date.UTC(y, mo - 1, d));
+          if (dt.getUTCFullYear() !== y || dt.getUTCMonth() !== mo - 1 || dt.getUTCDate() !== d) return null;
+          return `${y}-${pad2(mo)}-${pad2(d)}`;
+        }
+
+    function closeCal() { document.querySelectorAll(".hist-cal").forEach((c) => c.remove()); }
+
+    function openCal(el, onPick) {
+          closeCal();
+          const min = el.dataset.min, max = el.dataset.max;
+          let ym = (el.dataset.iso || max).slice(0, 7);
+          const pop = document.createElement("div");
+          pop.className = "hist-cal";
+          el.parentNode.appendChild(pop);
+          const draw = () => {
+            const y = +ym.slice(0, 4), m = +ym.slice(5, 7);
+            const lead = (new Date(Date.UTC(y, m - 1, 1)).getUTCDay() + 6) % 7; // Monday first
+            const n = new Date(Date.UTC(y, m, 0)).getUTCDate();
+            let cells = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"].map((d) => `<span class="cal-dow">${d}</span>`).join("") + "<span></span>".repeat(lead);
+            for (let d = 1; d <= n; d++) {
+              const iso = `${ym}-${pad2(d)}`;
+              cells += (iso < min || iso > max) ? "<span></span>"
+                : `<button type="button" class="cal-day${iso === el.dataset.iso ? " sel" : ""}" data-d="${iso}">${d}</button>`;
+            }
+            pop.innerHTML = `<div class="cal-head"><button type="button" class="cal-nav" data-nav="-1" ${ym <= min.slice(0, 7) ? "disabled" : ""}>‹</button><span>${BK_MONTHS[m - 1]} ${y}</span><button type="button" class="cal-nav" data-nav="1" ${ym >= max.slice(0, 7) ? "disabled" : ""}>›</button></div><div class="cal-grid">${cells}</div>`;
+          };
+          pop.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const nav = e.target.closest("[data-nav]"), day = e.target.closest("[data-d]");
+            if (nav && !nav.disabled) {
+              const d = new Date(Date.UTC(+ym.slice(0, 4), +ym.slice(5, 7) - 1 + +nav.dataset.nav, 1));
+              ym = `${d.getUTCFullYear()}-${pad2(d.getUTCMonth() + 1)}`; draw();
+            } else if (day) { setDay(el, day.dataset.d); closeCal(); onPick(); }
+          });
+          draw();
+        }
+
+    function drawHistChart(data, emptyMsg, from, to, cfg) {
+          cfg = cfg || {};
+          const box = document.getElementById(cfg.box || "histChart");
+          const stats = document.getElementById(cfg.stats || "histStats");
+          const note = document.getElementById(cfg.note || "histNote");
+          const lblUp = cfg.up || "Base days", lblDown = cfg.down || "Quote days";
+          const pct = !!cfg.pct; // show values as percent (100 bp = 1%)
+          note.textContent = cfg.noteText || "Each bar is the DIFFERENCE MOVE of one whole day. The day closes at 00:00 Warsaw time; hover a bar to see its date. Green = advantage for the base currency, red = for the quote currency.";
+          if (!data.length) { box.innerHTML = `<div class="status-msg">${emptyMsg || "No history yet. The first bar appears after the next 00:00 close."}</div>`; stats.innerHTML = ""; return; }
+    
+          // Phones and tablets: a narrower, taller drawing area that fits the card width (like etf.com); desktop keeps the wide layout
+          const phone = window.innerWidth < 600, tablet = !phone && window.innerWidth < 1024;
+          const W = phone ? 340 : 900, H = phone ? 340 : tablet ? 310 : 260, L = phone ? 40 : 46, R = 10, T = 14, B = 10;
+          const iw = W - L - R, ih = H - T - B;
+          const maxAbs = Math.max(1, ...data.map((d) => Math.abs(d.v)));
+          const step = maxAbs <= 5 ? 1 : maxAbs <= 10 ? 2 : maxAbs <= 25 ? 5 : maxAbs <= 50 ? 10 : 25;
+          const top = Math.ceil(maxAbs / step) * step;
+          const y = (v) => T + ih / 2 - (v / top) * (ih / 2);
+          // The whole selected period (e.g. 365 days for 1YR) always fits in the chart width, no scrolling.
+          // Each calendar day has its own slot; bars start at the left and the not-yet-existing days stay empty.
+          const dn = (iso) => Date.UTC(+iso.slice(0, 4), +iso.slice(5, 7) - 1, +iso.slice(8, 10)) / 864e5;
+          const span = from && to && from <= to ? dn(to) - dn(from) + 1 : data.length;
+          const slot = iw / Math.max(span, 1), bw = Math.max(1, Math.min(34, slot * 0.75));
+          let g = "";
+          for (let v = -top; v <= top; v += step) {
+            g += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="${v === 0 ? "#3a4a68" : "#172033"}"/>`
+               + `<text x="${L - 6}" y="${y(v) + 4}" text-anchor="end">${v > 0 ? "+" : v < 0 ? "−" : ""}${pct ? (Math.abs(v) / 100).toFixed(2) + "%" : Math.abs(v)}</text>`;
+          }
+          const bars = data.map((d) => {
+            const i = from ? dn(d.date) - dn(from) : 0;
+            const x = L + slot * i + (slot - bw) / 2, y0 = y(0), y1 = y(d.v);
+            const col = d.v > 0 ? "var(--up)" : d.v < 0 ? "var(--down)" : "var(--flat)";
+            const r1 = Math.round(d.v * 10) / 10;
+            return `<rect class="bar" x="${x}" y="${Math.min(y0, y1)}" width="${bw}" height="${Math.max(1, Math.abs(y1 - y0))}" rx="2" fill="${col}"><title>${d.date}: ${r1 > 0 ? "+" : ""}${pct ? (r1 / 100).toFixed(2) + "%" : r1.toFixed(1) + " bp"}</title></rect>`;
+          }).join("");
+          box.innerHTML = `<div class="hist-scroll"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Day difference move history">${g}${bars}`
+            + `<line class="hist-cursor" x1="0" x2="0" y1="${T}" y2="${H - B}"/></svg></div><div class="hist-tip"></div>`;
+          attachHistHover(box, data, from ? dn(from) : dn(data[0].date), span, slot, bw, L, iw, W, H, T, B, y, pct);
+    
+          const sum = data.reduce((a, d) => a + d.v, 0), pos = data.filter((d) => d.v > 0).length, neg = data.filter((d) => d.v < 0).length;
+          stats.innerHTML = `<span>Total: <strong>${pct ? fmtPct(sum) : fmtBp(sum)}</strong></span><span>${lblUp}: <strong class="bp up">${pos}</strong></span><span>${lblDown}: <strong class="bp down">${neg}</strong></span>`;
+        }
+
+    function attachHistHover(box, data, baseDay, span, slot, bw, L, iw, W, H, T, B, yOf, pct) {
+          const svg = box.querySelector("svg"), line = box.querySelector(".hist-cursor"), tip = box.querySelector(".hist-tip");
+          const byDate = new Map(data.map((d) => [d.date, d.v]));
+          const hide = () => { line.style.opacity = 0; tip.style.opacity = 0; };
+          svg.addEventListener("pointermove", (e) => {
+            const r = svg.getBoundingClientRect();
+            const sx = (e.clientX - r.left) / r.width * W;          // pointer in SVG units
+            if (sx < L || sx > L + iw) return hide();
+            const i = Math.min(span - 1, Math.max(0, Math.floor((sx - L) / slot)));
+            const iso = new Date((baseDay + i) * 864e5).toISOString().slice(0, 10);
+            const v = byDate.get(iso);
+            line.setAttribute("x1", sx); line.setAttribute("x2", sx);
+            line.style.opacity = 1;
+            // Data shows only while the line is over a bar (not over empty days or the gaps between bars)
+            const barX = L + slot * i + (slot - bw) / 2;
+            if (v == null || sx < barX || sx > barX + bw) { tip.style.opacity = 0; return; }
+            const sign = v > 0 ? "+" : v < 0 ? "−" : "";
+            const col = v > 0 ? "var(--up)" : v < 0 ? "var(--down)" : "var(--flat)";
+            const fmtD = `${iso.slice(8)}.${iso.slice(5, 7)}.${iso.slice(0, 4)}`;
+            tip.innerHTML = `<span class="tip-date">${fmtD}</span>`
+              + `<span class="tip-val" style="color:${col}">${sign}${pct ? (Math.abs(v) / 100).toFixed(2) + "%" : Math.abs(Math.round(v * 10) / 10).toFixed(1) + " bp"}</span>`;
+            // Tooltip sits right at the bar: centred on it, just above a positive bar or just below a negative one
+            const barCx = barX + bw / 2, endY = yOf(v);
+            // SVG elements have no offsetLeft/offsetTop, so measure the chart box position directly
+            const bx = box.getBoundingClientRect();
+            const svgLeft = r.left - bx.left, svgTop = r.top - bx.top;
+            const px = svgLeft + barCx / W * r.width;
+            const ePx = svgTop + endY / H * r.height;
+            const half = tip.offsetWidth / 2;
+            tip.style.left = Math.min(box.clientWidth - half - 4, Math.max(half + 4, px)) + "px";
+            if (v > 0) { tip.style.top = Math.max(4, ePx - 6) + "px"; tip.style.transform = "translate(-50%, -100%)"; }
+            else { tip.style.top = (ePx + 6) + "px"; tip.style.transform = "translate(-50%, 0)"; }
+            tip.style.opacity = 1;
+          });
+          svg.addEventListener("pointerleave", hide);
+        }
+
+    function buildBanks(rows) {
+          const m = {};
+          const put = (c, bp, mv) => {
+            const o = m[c] || (m[c] = { cur: c, bp: null, move: null });
+            if (o.bp == null && isNum(bp)) o.bp = bp;
+            if (o.move == null && isNum(mv)) o.move = mv;
+          };
+          rows.forEach((r) => {
+            const [b, q] = String(r.pair).split("/");
+            put(b, r.base, r.baseMove && r.baseMove.d);
+            put(q, r.quote, r.quoteMove && r.quoteMove.d);
+          });
+          return ORDER.filter((c) => m[c]).map((c) => m[c]);
+        }
+
+    function nextProbs(pr) {
+          if (!pr || !isNum(pr.cut) && !isNum(pr.hold) && !isNum(pr.hike)) return `<span class="na">—</span>`;
+          const f = (v) => isNum(v) ? `${v.toFixed(1)}%` : "—";
+          return `<span class="st cut">Cut ${f(pr.cut)}</span> · <span class="st hold">Hold ${f(pr.hold)}</span> · <span class="st hike">Hike ${f(pr.hike)}</span>`;
+        }
+
+    function renderBanks() {
+          const body = document.getElementById("banksBody");
+          if (!body) return;
+          let rows = buildBanks(lastPairRows).map((r) => ({ ...r, bp: matrixNext[r.cur] ? matrixNext[r.cur].bp : null, pr: matrixNext[r.cur] || null }));
+          if (!rows.length) { body.innerHTML = `<tr><td colspan="5" class="na">Loading…</td></tr>`; return; }
+          if (bankSortKey) {
+            const dir = bankSortDir === "desc" ? -1 : 1;
+            rows = rows.slice().sort((a, b) => {
+              const x = a[bankSortKey], y = b[bankSortKey];
+              if (x == null && y == null) return 0;
+              if (x == null) return 1;
+              if (y == null) return -1;
+              return (x - y) * dir;
+            });
+          }
+          const stance = {};
+          stanceRows.forEach((r) => { stance[String(r.currency || "").toUpperCase()] = r; });
+          const stCls = (v) => { const u = String(v || "").toUpperCase(); return u === "HIKE" ? "hike" : u === "CUT" ? "cut" : u === "HOLD" ? "hold" : ""; };
+          body.innerHTML = rows.map((r) => {
+            const st = stance[r.cur];
+            const name = (st && st.bank) || BANK_NAMES[r.cur] || r.cur;
+            const fc = FLAGS[r.cur];
+            const flag = fc ? `<img class="cflag" src="https://flagcdn.com/w40/${fc}.png" srcset="https://flagcdn.com/w80/${fc}.png 2x" width="24" height="18" alt="" loading="lazy" />` : "";
+            const mv = isNum(r.move) ? Math.round(r.move * 10) / 10 : null;
+            let stCell = "—";
+            if (st) {
+              const cur = st.to || st.from;
+              const at = st.at ? new Date(/Z$|[+-]\d{2}:\d{2}$/.test(st.at) ? st.at : st.at + "Z") : null;
+              const when = at ? `<div class="mv-time">${at.toLocaleDateString("en-GB", { year: "numeric", month: "2-digit", day: "2-digit" })} ${at.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}</div>` : "";
+              stCell = cur ? `<span class="st ${stCls(cur)}">${esc(cur)}</span>${when}` : "—";
+            }
+            return `<tr>
+              <td class="bank">${flag}${esc(name)}</td>
+              <td>${r.cur}</td>
+              <td>${nextProbs(r.pr)}</td>
+              <td>${fmtPct(r.move)}</td>
+              <td>${stCell}</td>
+            </tr>`;
+          }).join("");
+        }
+
+    function updateBankSortHeaders() {
+          document.querySelectorAll("th[data-bsort]").forEach((th) => {
+            th.classList.toggle("desc", th.dataset.bsort === bankSortKey && bankSortDir === "desc");
+            th.classList.toggle("asc", th.dataset.bsort === bankSortKey && bankSortDir === "asc");
+          });
+        }
+
+    async function fetchBankHistory(cur) {
+          const res = await fetch(`${HISTORY_URL.replace(/\/+$/, "")}/bank-history?bank=${encodeURIComponent(cur)}&days=3650`);
+          if (!res.ok) throw new Error("HTTP " + res.status);
+          const j = await res.json();
+          return (j.days || []).map((x) => ({ date: x.date, v: x.d ?? x.dm ?? x.v })).filter((x) => isNum(x.v));
+        }
+
+    function bankBounds() {
+          const y = new Date(); y.setDate(y.getDate() - 1);
+          const last = warsawDay(y) < BANK_HISTORY_START ? BANK_HISTORY_START : warsawDay(y); // latest closed day = yesterday
+          const fromEl = document.getElementById("bankFrom"), toEl = document.getElementById("bankTo");
+          fromEl.dataset.min = toEl.dataset.min = BANK_HISTORY_START; fromEl.dataset.max = toEl.dataset.max = last;
+          return last;
+        }
+
+    function drawBankHistory() {
+          const fromEl = document.getElementById("bankFrom"), toEl = document.getElementById("bankTo");
+          const first = BANK_HISTORY_START, last = bankBounds();
+          const lastMs = Date.UTC(+last.slice(0, 4), +last.slice(5, 7) - 1, +last.slice(8, 10));
+          const yr = new Date(lastMs - 364 * 864e5).toISOString().slice(0, 10);
+          if (bankMode === "yr") { setDay(fromEl, yr > first ? yr : first); setDay(toEl, last); }
+          const from = fromEl.dataset.iso || first, to = toEl.dataset.iso || last;
+          const data = bankHist.filter((x) => x.date >= from && x.date <= to);
+          const emptyMsg = from > to ? "“From” is later than “To”." : bankHist.length ? "No data in the selected period." : "No history yet. The first bar appears after the next 00:00 close.";
+          drawHistChart(data, emptyMsg, bankMode === "yr" ? yr : from, to, BANK_CHART);
+        }
+
+    function initBankRange() {
+          const yr = document.getElementById("bankYr");
+          bankBounds();
+          document.addEventListener("click", closeCal);
+          yr.addEventListener("click", () => { bankMode = "yr"; yr.classList.add("active"); drawBankHistory(); });
+          ["bankFrom", "bankTo"].forEach((id) => {
+            const el = document.getElementById(id);
+            el.addEventListener("click", (e) => {
+              e.stopPropagation();
+              openCal(el, () => { bankMode = "custom"; yr.classList.remove("active"); drawBankHistory(); });
+            });
+            el.addEventListener("change", () => {
+              const iso = parseDay(el.value);
+              if (!iso) { el.value = fmtDay(el.dataset.iso); return; }
+              setDay(el, iso < el.dataset.min ? el.dataset.min : iso > el.dataset.max ? el.dataset.max : iso);
+              closeCal(); bankMode = "custom"; yr.classList.remove("active"); drawBankHistory();
+            });
+            el.addEventListener("keydown", (e) => { if (e.key === "Enter") el.blur(); });
+          });
+        }
+
+    async function refreshBankHistory() {
+          document.getElementById("bankChart").innerHTML = `<div class="status-msg">Loading…</div>`;
+          try { bankHist = await fetchBankHistory(bankCur); drawBankHistory(); }
+          catch (e) {
+            console.error(e);
+            document.getElementById("bankChart").innerHTML = `<div class="status-msg">Bank history unavailable.<br><small>${esc(e.message)}</small></div>`;
+            document.getElementById("bankStats").innerHTML = "";
+          }
+        }
+
+    const BANK_CHART = { box: "bankChart", stats: "bankStats", note: "bankNote", up: "Up days", down: "Down days",
+          pct: true, noteText: "Each bar is the change of the bank's expected rate over one whole day, in percent (closes at 00:00 Warsaw time); hover a bar to see its date. Green = rate expectation rose (more hawkish), red = fell (more dovish)." };
+
+
+    // Matrix data comes from the Interest Rate Probability loader (already fetched there): same next-meeting numbers.
+    window.bkOnMatrix = function (list) {
+      const next = {};
+      (list || []).forEach((m) => {
+        if (!m || !m.currency) return;
+        const first = (m.meetings || []).find((mt) => isNum(mt.hold_probability) || isNum(mt.implied_change_bp));
+        next[String(m.currency).toUpperCase()] = {
+          bp: nextBp(m),
+          cut: first && isNum(first.cut_probability) ? first.cut_probability : null,
+          hold: first && isNum(first.hold_probability) ? first.hold_probability : null,
+          hike: first && isNum(first.hike_probability) ? first.hike_probability : null
+        };
+      });
+      matrixNext = next; renderBanks();
+    };
+
+    // Same pause as the main table: no fetching from Saturday 00:00 to Monday 00:00 (Warsaw time)
+    function bkMarketClosed() {
+      const wd = new Intl.DateTimeFormat("en-US", { timeZone: "Europe/Warsaw", weekday: "short" }).format(new Date());
+      return wd === "Sat" || wd === "Sun";
+    }
+
+    async function loadPairs() {
+      try {
+        const res = await fetch(`${PAIRS_URL}/pairs`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        lastPairRows = data.rows || []; renderBanks();
+      } catch (err) { console.error(err); }
+    }
+
+    // Central bank stance: GET <worker>/stance -> { rows: [{ bank, currency, from, to, meeting, at }] }
+    async function loadStance() {
+      try {
+        const res = await fetch(`${PAIRS_URL}/stance`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const j = await res.json();
+        stanceRows = j.rows || []; renderBanks();
+      } catch (err) { console.error(err); }
+    }
+
+    // Sorting of the Banks table
+    document.querySelectorAll("th[data-bsort]").forEach((th) => {
+      th.addEventListener("click", () => {
+        const k = th.dataset.bsort;
+        if (bankSortKey !== k) { bankSortKey = k; bankSortDir = "desc"; }
+        else if (bankSortDir === "desc") { bankSortDir = "asc"; }
+        else { bankSortKey = null; bankSortDir = "desc"; }
+        updateBankSortHeaders();
+        renderBanks();
+      });
+    });
+
+    // Banks section is always shown at the bottom of the page: load now, then refresh every 30 s (paused on weekends)
+    function bkTick() { if (!bkMarketClosed()) { loadPairs(); loadStance(); } }
+    renderBanks();
+    loadPairs(); loadStance();
+    refreshBankHistory();
+    bankHistLoaded = true;
+    bankTimer = setInterval(bkTick, BK_POLL_MS);
+
+    (function initBankButtons() {
+          const box = document.getElementById("bankBtns");
+          box.innerHTML = ORDER.map((c) => `<button type="button" data-cur="${c}" class="${c === bankCur ? "active" : ""}" title="${esc(BANK_NAMES[c])}">${c}</button>`).join("")
+            + `<button type="button" id="bankYr" class="active">1YR</button>`;
+          box.addEventListener("click", (e) => {
+            const b = e.target.closest("button[data-cur]");
+            if (!b) return;
+            bankCur = b.dataset.cur;
+            box.querySelectorAll("button[data-cur]").forEach((x) => x.classList.toggle("active", x === b));
+            refreshBankHistory();
+          });
+          initBankRange();
+          let t = null;
+          window.addEventListener("resize", () => { clearTimeout(t); t = setTimeout(() => { if (bankHist.length && !document.getElementById("banksSection").hidden) drawBankHistory(); }, 150); });
+        })();
+  })();
+  </script>
+  <script>
+  (function () {
+    var SYMBOL = "%5EVIX";
+    var SOURCE = "https://query1.finance.yahoo.com/v8/finance/chart/" + SYMBOL + "?range=1d&interval=1d";
+    var PROXY = "https://serverserver.serverserver.workers.dev/?url="; // Cloudflare Worker proxy (Yahoo Finance CORS workaround)
+    var REFRESH_MS = 60000;
+    var hasLoaded = false;
+    function isClosed() {
+      var wd = new Intl.DateTimeFormat("en-US", { timeZone: "Europe/Warsaw", weekday: "short" }).format(new Date());
+      return wd === "Sat" || wd === "Sun";
+    }
+    var el = {
+      value: document.getElementById("vixValue"),
+      change: document.getElementById("vixChange"),
+      time: document.getElementById("vixTime"),
+      regime: document.getElementById("vixRegime"),
+      desc: document.getElementById("vixDesc")
+    };
+
+    function regimeFor(v) {
+      if (v < 15) return { label: "RISK ON", cls: "on", range: "0–15", desc: "Low expected volatility, relatively calm market." };
+      if (v < 20) return { label: "RISK ON / NEUTRAL", cls: "neutral", range: "15–20", desc: "Normal or moderate uncertainty." };
+      if (v < 30) return { label: "RISK OFF", cls: "off", range: "20–30", desc: "Elevated uncertainty and greater risk aversion." };
+      if (v < 40) return { label: "STRONG RISK OFF", cls: "strong", range: "30–40", desc: "Strong market stress." };
+      return { label: "EXTREME RISK OFF", cls: "extreme", range: "40+", desc: "Extreme volatility and market fear." };
+    }
+
+    function render(price, prev) {
+      el.value.textContent = price.toFixed(2);
+      var diff = price - prev;
+      var pct = prev ? (diff / prev) * 100 : 0;
+      var sign = diff >= 0 ? "+" : "";
+      el.change.textContent = sign + pct.toFixed(2) + "%";
+      el.change.className = "vix-change " + (diff > 0 ? "up" : diff < 0 ? "down" : "");
+      el.time.textContent = "· " + new Date().toLocaleString("en-GB", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" });
+      var r = regimeFor(price);
+      el.regime.textContent = r.label;
+      el.regime.className = "vix-regime " + r.cls;
+      el.desc.textContent = r.desc + " (VIX " + r.range + ")";
+    }
+
+    function fail() {
+      el.value.textContent = "n/a";
+      el.change.textContent = "";
+      el.time.textContent = "· data unavailable";
+      el.regime.textContent = "";
+      el.desc.textContent = "";
+    }
+
+    async function load() {
+      if (hasLoaded && isClosed()) return;
+      try {
+        var res = await fetch(PROXY ? PROXY + encodeURIComponent(SOURCE) : SOURCE, { cache: "no-store" });
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        var json = await res.json();
+        var meta = json.chart.result[0].meta;
+        var price = meta.regularMarketPrice;
+        var prev = meta.chartPreviousClose || meta.previousClose;
+        if (typeof price !== "number") throw new Error("no price");
+        render(price, prev);
+        hasLoaded = true;
+      } catch (e) {
+        console.warn("VIX load failed (Yahoo Finance direct requests are often blocked by CORS; set PROXY):", e);
+        fail();
+      }
+    }
+
+    load();
+    setInterval(load, REFRESH_MS);
+  })();
+  </script>
+</body>
+</html>
